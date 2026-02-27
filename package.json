@@ -1,0 +1,15 @@
+{
+  "name": "michael-voice-agent",
+  "version": "1.0.0",
+  "description": "Michael — AI BDR Cold Calling Voice Agent by Mantyl. Makes real phone calls via Twilio, speaks with ElevenLabs, thinks with OpenAI, debriefs with Claude.",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static site — no build step required'",
+    "deploy": "netlify deploy --prod",
+    "deploy:preview": "netlify deploy"
+  },
+  "author": "Mantyl <hello@mantyl.ai> (https://mantyl.ai)",
+  "license": "MIT",
+  "homepage": "https://michael.mantyl.ai"
+}

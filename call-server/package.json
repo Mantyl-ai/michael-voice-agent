@@ -1,0 +1,23 @@
+{
+  "name": "michael-call-server",
+  "version": "1.0.0",
+  "description": "Michael BDR Voice Agent — Call Engine Server. Handles Twilio Media Streams, Deepgram STT, OpenAI conversation, ElevenLabs TTS.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0",
+    "twilio": "^5.4.0",
+    "@deepgram/sdk": "^3.9.0",
+    "openai": "^4.77.0",
+    "uuid": "^9.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Michael — AI Cold Calling Agent | Mantyl</title>
+<meta name="description" content="Meet Michael, your AI BDR. Tell him what you're selling, and he'll cold call you to demonstrate how he'd pitch your product to prospects."/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0%25' y1='100%25' x2='50%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%235A79CA'/%3E%3Cstop offset='100%25' stop-color='%238B6DB3'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='50%25' y1='100%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23C06E85'/%3E%3Cstop offset='100%25' stop-color='%23D4856A'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M4 38 L18 6 L26 30 Z' fill='url(%23a)' opacity='.85'/%3E%3Cpath d='M22 30 L30 6 L44 38 Z' fill='url(%23b)' opacity='.75'/%3E%3C/svg%3E"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --navy:#0f172a; --navy-l:#1e293b; --navy-ll:#334155;
+  --blue:#6B8ADB; --blue-d:#5A79CA; --lav:#9B7FC7; --rose:#D4849A; --peach:#E89E6C;
+  --grad:linear-gradient(135deg,#6B8ADB 0%,#9B7FC7 33%,#D4849A 66%,#E89E6C 100%);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --r:12px; --r-lg:20px; --r-xl:32px;
+  --green:#22c55e; --red:#ef4444; --yellow:#eab308;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
+#root{min-height:100vh;display:flex;flex-direction:column}
+
+/* ─── HEADER ─── */
+.hdr{background:var(--navy);height:56px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--grad);opacity:.7}
+.hdr-l{display:flex;align-items:center;gap:14px}
+.hdr-l a{display:flex;align-items:center;text-decoration:none}
+.hdr-div{width:1px;height:20px;background:rgba(255,255,255,.1)}
+.hdr-name{color:rgba(255,255,255,.85);font-size:13px;font-weight:500}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.hdr-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:rgba(107,138,219,.1);border:1px solid rgba(107,138,219,.18);border-radius:16px;font-size:10px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.04em}
+.hdr-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.5);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── HERO ─── */
+.hero{background:var(--navy);position:relative;overflow:hidden;padding:0}
+.hero::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 70% 50%,rgba(107,138,219,.18) 0%,transparent 60%),
+  radial-gradient(ellipse 60% 80% at 30% 80%,rgba(155,127,199,.12) 0%,transparent 55%);pointer-events:none}
+.hero-wrap{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;min-height:480px;position:relative;z-index:1}
+.hero-left{display:flex;flex-direction:column;justify-content:center;padding:60px 48px 60px 36px}
+.hero-h1{font-size:50px;font-weight:900;color:#fff;line-height:1.08;letter-spacing:-1.5px;margin-bottom:18px}
+.hero-h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-p{font-size:16px;color:#94a3b8;line-height:1.7;max-width:440px;margin-bottom:32px}
+.hero-right{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:32px 0}
+.michael-showcase{position:relative;display:flex;align-items:flex-end;justify-content:center}
+.michael-bg{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:360px;height:360px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(107,138,219,.4) 0%,rgba(155,127,199,.35) 25%,rgba(212,132,154,.3) 50%,transparent 100%);filter:blur(40px);animation:glow-breathe 6s ease-in-out infinite}
+.michael-ring{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:300px;height:300px;border-radius:50%;border:1.5px solid rgba(107,138,219,.15);animation:ring-pulse 4s ease-in-out infinite}
+@keyframes ring-pulse{0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.03)}}
+@keyframes glow-breathe{0%,100%{transform:translateX(-50%) scale(1);opacity:.7}50%{transform:translateX(-50%) scale(1.08);opacity:1}}
+.michael-img{position:relative;z-index:2;width:340px;height:auto;filter:drop-shadow(0 20px 60px rgba(0,0,0,.4));border-radius:20px}
+
+/* ─── FORM CARD ─── */
+.card{background:#fff;border-radius:var(--r-lg);box-shadow:0 4px 24px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);padding:36px;max-width:800px;margin:0 auto;width:100%}
+.card-title{font-size:22px;font-weight:800;margin-bottom:6px;letter-spacing:-.5px}
+.card-sub{color:#64748b;font-size:14px;margin-bottom:28px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg-full{grid-column:1/-1}
+.fi{display:flex;flex-direction:column;gap:5px}
+.fi label{font-size:12px;font-weight:600;color:var(--navy-ll);text-transform:uppercase;letter-spacing:.04em}
+.fi input,.fi select,.fi textarea{padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:var(--font);transition:border .15s,box-shadow .15s;background:#fff;color:var(--navy);outline:none}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(107,138,219,.12)}
+.fi textarea{min-height:80px;resize:vertical}
+.fi .required{color:var(--rose)}
+.fi-error input,.fi-error select,.fi-error textarea{border-color:var(--red)}
+.fi-error-msg{color:var(--red);font-size:11px;font-weight:500}
+
+/* Tone selector */
+.tone-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tone-opt{padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:10px;text-align:center;cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;background:#fff}
+.tone-opt:hover{border-color:var(--blue);background:rgba(107,138,219,.04)}
+.tone-opt.active{border-color:var(--blue);background:rgba(107,138,219,.08);color:var(--blue-d);font-weight:700}
+
+/* Go button */
+.go-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;margin-top:24px;background:var(--grad);color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:700;font-family:var(--font);cursor:pointer;transition:transform .15s,box-shadow .15s;letter-spacing:-.2px}
+.go-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(107,138,219,.3)}
+.go-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ─── SECTION CONTAINER ─── */
+.section{padding:48px 28px;max-width:1000px;margin:0 auto;width:100%}
+
+/* ─── PAGE 2: LIVE CALL ─── */
+.call-page{background:var(--navy);min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center}
+.call-wrap{max-width:1140px;width:100%;padding:32px 28px;display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;flex:1}
+.call-left{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.call-avatar{position:relative}
+.call-avatar img{width:280px;height:auto;border-radius:20px;filter:drop-shadow(0 16px 48px rgba(0,0,0,.5))}
+
+/* Animated orb behind avatar during call */
+.call-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:320px;height:320px;border-radius:50%;filter:blur(40px);opacity:.6;z-index:0;transition:all .5s ease}
+.call-orb.listening{background:conic-gradient(from 0deg,rgba(107,138,219,.5),rgba(155,127,199,.4),rgba(107,138,219,.5));animation:orb-listen 3s ease-in-out infinite}
+.call-orb.speaking{background:conic-gradient(from 0deg,rgba(107,138,219,.7),rgba(155,127,199,.6),rgba(212,132,154,.6),rgba(232,158,108,.5),rgba(107,138,219,.7));animation:orb-speak 1.5s ease-in-out infinite}
+.call-orb.thinking{background:radial-gradient(circle,rgba(155,127,199,.6),rgba(107,138,219,.3));animation:orb-think 1s ease-in-out infinite}
+.call-orb.ringing{background:radial-gradient(circle,rgba(34,197,94,.4),rgba(107,138,219,.3));animation:orb-ring 0.8s ease-in-out infinite}
+@keyframes orb-listen{0%,100%{transform:translate(-50%,-50%) scale(1);border-radius:50%}50%{transform:translate(-50%,-50%) scale(1.05);border-radius:48% 52% 50% 50%}}
+@keyframes orb-speak{0%,100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);border-radius:50%}25%{transform:translate(-50%,-50%) scale(1.12) rotate(30deg);border-radius:46% 54% 50% 50%}50%{transform:translate(-50%,-50%) scale(.95) rotate(60deg);border-radius:54% 46% 48% 52%}75%{transform:translate(-50%,-50%) scale(1.08) rotate(90deg);border-radius:48% 52% 54% 46%}}
+@keyframes orb-think{0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(1)}50%{opacity:.7;transform:translate(-50%,-50%) scale(1.06)}}
+@keyframes orb-ring{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.1)}}
+
+.call-status{text-align:center}
+.call-status-text{color:#fff;font-size:18px;font-weight:700;margin-bottom:6px}
+.call-status-sub{color:#94a3b8;font-size:13px}
+.call-timer{color:var(--blue);font-size:14px;font-weight:600;margin-top:8px;font-variant-numeric:tabular-nums}
+.call-phone-icon{font-size:32px;animation:phone-ring .5s ease-in-out infinite alternate}
+@keyframes phone-ring{0%{transform:rotate(-15deg)}100%{transform:rotate(15deg)}}
+
+/* Right: Transcript */
+.call-right{display:flex;flex-direction:column;gap:16px}
+.transcript-header{display:flex;align-items:center;justify-content:space-between}
+.transcript-title{color:#fff;font-size:16px;font-weight:700}
+.transcript-status{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:16px;font-size:11px;font-weight:600;color:var(--green)}
+.transcript-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+.transcript-box{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--r-lg);padding:20px;overflow-y:auto;max-height:calc(100vh - 240px);min-height:300px}
+.t-msg{margin-bottom:16px;animation:msg-in .3s ease}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.t-msg-speaker{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.t-msg-speaker.michael{color:var(--blue)}
+.t-msg-speaker.user{color:var(--peach)}
+.t-msg-text{color:rgba(255,255,255,.85);font-size:14px;line-height:1.6}
+.t-msg-text.interim{color:rgba(255,255,255,.4);font-style:italic}
+.t-empty{color:#64748b;font-size:14px;text-align:center;padding:40px 0}
+
+.call-end-btn{padding:10px 24px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:10px;color:var(--red);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s;align-self:center;margin-top:12px}
+.call-end-btn:hover{background:rgba(239,68,68,.25)}
+
+/* ─── PAGE 3: DEBRIEF ─── */
+.db-hero{background:var(--navy);padding:40px 28px 24px;text-align:center}
+.db-hero h2{font-size:32px;font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:8px}
+.db-hero h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.db-hero-sub{color:#94a3b8;font-size:14px}
+.db-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:700px;margin:24px auto 0;padding:0 16px}
+.db-meta-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center}
+.db-meta-label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.db-meta-val{font-size:16px;font-weight:700;color:#fff}
+.db-meta-val.green{color:var(--green)}
+.db-meta-val.yellow{color:var(--yellow)}
+.db-meta-val.red{color:var(--red)}
+
+/* Tabs */
+.db-tabs{display:flex;gap:4px;max-width:800px;margin:0 auto;padding:24px 28px 0}
+.db-tab{padding:10px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:#64748b;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s}
+.db-tab:hover{color:var(--navy)}
+.db-tab.active{color:var(--blue-d);border-bottom-color:var(--blue)}
+
+.db-content{max-width:800px;margin:0 auto;padding:24px 28px 60px}
+.db-panel{background:#fff;border-radius:var(--r-lg);box-shadow:0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);padding:28px}
+.db-section-title{font-size:18px;font-weight:800;margin-bottom:12px;letter-spacing:-.3px}
+.db-text{color:#475569;font-size:14px;line-height:1.8}
+.db-text p{margin-bottom:12px}
+.db-text strong{color:var(--navy);font-weight:700}
+
+.db-email{background:#f8fafc;border:1px solid #e2e8f0;border-radius:var(--r);padding:20px;margin-top:12px}
+.db-email-subject{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e2e8f0}
+.db-email-body{font-size:14px;line-height:1.7;color:#475569}
+
+.db-transcript{max-height:400px;overflow-y:auto}
+.db-t-line{padding:8px 0;border-bottom:1px solid #f1f5f9}
+.db-t-speaker{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.db-t-speaker.michael{color:var(--blue)}
+.db-t-speaker.user{color:var(--peach)}
+.db-t-text{font-size:14px;color:#475569;line-height:1.6}
+
+.copy-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;color:#64748b;font-family:var(--font);cursor:pointer;transition:all .15s;margin-top:16px}
+.copy-btn:hover{background:#e2e8f0;color:var(--navy)}
+
+.reset-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--grad);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;transition:transform .15s;margin-top:24px}
+.reset-btn:hover{transform:translateY(-1px)}
+
+/* ─── LOADING SPINNER ─── */
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .hero-wrap{grid-template-columns:1fr;text-align:center}
+  .hero-left{padding:40px 20px 24px;align-items:center}
+  .hero-p{margin-left:auto;margin-right:auto}
+  .michael-img{width:220px}
+  .fg{grid-template-columns:1fr}
+  .tone-grid{grid-template-columns:repeat(2,1fr)}
+  .call-wrap{grid-template-columns:1fr;gap:24px}
+  .call-left{padding-bottom:0}
+  .call-avatar img{width:200px}
+  .db-meta{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(100,116,139,.2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(100,116,139,.4)}
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── CONFIG ───
+const CALL_SERVER_WS = window.location.hostname === 'localhost'
+  ? 'ws://localhost:3001'
+  : 'wss://michael-call-server.up.railway.app'; // UPDATE with your Railway URL
+
+// ─── LOGO ───
+function Logo() {
+  return (
+    <svg width="32" height="30" viewBox="0 0 48 44" fill="none">
+      <defs>
+        <linearGradient id="la" x1="0%" y1="100%" x2="50%" y2="0%"><stop offset="0%" stopColor="#5A79CA"/><stop offset="100%" stopColor="#8B6DB3"/></linearGradient>
+        <linearGradient id="lb" x1="50%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stopColor="#C06E85"/><stop offset="100%" stopColor="#D4856A"/></linearGradient>
+      </defs>
+      <path d="M4 38 L18 6 L26 30 Z" fill="url(#la)" opacity=".85"/>
+      <path d="M22 30 L30 6 L44 38 Z" fill="url(#lb)" opacity=".75"/>
+    </svg>
+  );
+}
+
+// ─── MAIN APP ───
+function App() {
+  const [step, setStep] = useState('setup'); // setup | call | debrief
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '', phone: '',
+    company: '', selling: '', tone: 'professional',
+    industry: '', targetRole: '', valueProps: '', commonObjections: '', additionalContext: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [callStatus, setCallStatus] = useState('idle'); // idle | initiating | ringing | connected | speaking | listening | thinking | ended
+  const [transcript, setTranscript] = useState([]);
+  const [interimText, setInterimText] = useState('');
+  const [callTimer, setCallTimer] = useState(0);
+  const [debrief, setDebrief] = useState(null);
+  const [debriefTab, setDebriefTab] = useState('summary');
+  const [debriefLoading, setDebriefLoading] = useState(false);
+
+  const wsRef = useRef(null);
+  const timerRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  // Auto-scroll transcript
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [transcript, interimText]);
+
+  // Call timer
+  useEffect(() => {
+    if (callStatus === 'connected' || callStatus === 'speaking' || callStatus === 'listening' || callStatus === 'thinking') {
+      timerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [callStatus]);
+
+  // Format timer
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  // Update form
+  const setField = (key, val) => {
+    setForm(f => ({ ...f, [key]: val }));
+    if (errors[key]) setErrors(e => ({ ...e, [key]: null }));
+  };
+
+  // Validate form
+  const validate = () => {
+    const e = {};
+    if (!form.firstName.trim()) e.firstName = 'Required';
+    if (!form.lastName.trim()) e.lastName = 'Required';
+    if (!form.email.trim() || !form.email.includes('@')) e.email = 'Valid email required';
+    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 10) e.phone = 'Valid phone number required';
+    if (!form.company.trim()) e.company = 'Required';
+    if (!form.selling.trim()) e.selling = 'Tell Michael what to sell';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  // Connect WebSocket for live transcript
+  const connectTranscript = (sid) => {
+    const ws = new WebSocket(`${CALL_SERVER_WS}/call/transcript/${sid}`);
+    wsRef.current = ws;
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      switch (data.type) {
+        case 'session_state':
+          if (data.transcript?.length) {
+            setTranscript(data.transcript.map(t => ({
+              speaker: t.speaker,
+              text: t.text,
+            })));
+          }
+          break;
+
+        case 'user_speech_interim':
+          setInterimText(data.text);
+          break;
+
+        case 'user_speech':
+          setInterimText('');
+          setTranscript(t => [...t, { speaker: form.firstName || 'You', text: data.text }]);
+          break;
+
+        case 'michael_speech':
+          setTranscript(t => [...t, { speaker: 'Michael', text: data.text }]);
+          break;
+
+        case 'status':
+          if (['speaking', 'listening', 'thinking'].includes(data.value)) {
+            setCallStatus(data.value);
+          } else if (data.value === 'connected') {
+            setCallStatus('connected');
+          }
+          break;
+
+        case 'call_status':
+          if (data.status === 'ringing') setCallStatus('ringing');
+          if (data.status === 'in-progress') setCallStatus('connected');
+          break;
+
+        case 'call_ended':
+          setCallStatus('ended');
+          clearInterval(timerRef.current);
+          // Auto-generate debrief
+          generateDebrief(data.transcript || transcript);
+          break;
+
+        case 'meeting_booked':
+          // Meeting was booked during the call
+          break;
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('Transcript WebSocket closed');
+    };
+
+    ws.onerror = (err) => {
+      console.error('Transcript WebSocket error:', err);
+    };
+  };
+
+  // Initiate call
+  const startCall = async () => {
+    if (!validate()) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/initiate-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setSessionId(data.sessionId);
+      setCallStatus('initiating');
+      setStep('call');
+      setCallTimer(0);
+      setTranscript([]);
+
+      // Connect WebSocket for live transcript
+      connectTranscript(data.sessionId);
+      setTimeout(() => setCallStatus('ringing'), 1000);
+    } catch (err) {
+      console.error('Failed to start call:', err);
+      alert('Failed to initiate call. Please check your phone number and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // End call early
+  const endCall = () => {
+    setCallStatus('ended');
+    clearInterval(timerRef.current);
+    if (wsRef.current) wsRef.current.close();
+    generateDebrief(transcript);
+  };
+
+  // Generate debrief via Claude
+  const generateDebrief = async (transcriptData) => {
+    setStep('debrief');
+    setDebriefLoading(true);
+
+    const transcriptText = (transcriptData || transcript)
+      .map(t => `${t.speaker}: ${t.text}`)
+      .join('\n');
+
+    try {
+      const res = await fetch('/api/debrief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: transcriptText,
+          context: form,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+
+      // Parse the structured debrief
+      setDebrief(parseDebrief(data.content));
+    } catch (err) {
+      console.error('Debrief generation error:', err);
+      setDebrief({
+        summary: 'Failed to generate debrief. The transcript is available below.',
+        meetingBooked: 'Unknown',
+        interest: 'Unknown',
+        nextSteps: [],
+        email: { subject: '', body: '' },
+      });
+    } finally {
+      setDebriefLoading(false);
+    }
+  };
+
+  // Parse Claude's markdown debrief into structured data
+  const parseDebrief = (text) => {
+    const sections = {};
+    let current = '';
+
+    text.split('\n').forEach(line => {
+      if (line.startsWith('## CALL SUMMARY')) current = 'summary';
+      else if (line.startsWith('## MEETING DETAILS')) current = 'meeting';
+      else if (line.startsWith('## NEXT STEPS')) current = 'steps';
+      else if (line.startsWith('## FOLLOW-UP EMAIL')) current = 'email';
+      else if (current) {
+        sections[current] = (sections[current] || '') + line + '\n';
+      }
+    });
+
+    // Parse meeting details
+    const meetingText = sections.meeting || '';
+    const meetingBooked = /Meeting Booked:\s*(YES|NO)/i.exec(meetingText)?.[1] || 'Unknown';
+    const interest = /Interest Level:\s*(HIGH|MEDIUM|LOW)/i.exec(meetingText)?.[1] || 'Unknown';
+    const proposedTime = /Proposed Time:\s*(.+)/i.exec(meetingText)?.[1] || 'Not discussed';
+
+    // Parse email
+    const emailText = sections.email || '';
+    const subjectMatch = /Subject:\s*(.+)/i.exec(emailText);
+    const emailSubject = subjectMatch?.[1] || '';
+    const emailBody = emailText.replace(/Subject:.+\n?/, '').trim();
+
+    // Parse next steps
+    const stepsText = sections.steps || '';
+    const nextSteps = stepsText.split('\n')
+      .filter(l => /^\d+\./.test(l.trim()))
+      .map(l => l.replace(/^\d+\.\s*/, '').trim())
+      .filter(Boolean);
+
+    return {
+      summary: (sections.summary || '').trim(),
+      meetingBooked,
+      interest,
+      proposedTime,
+      meetingDetails: meetingText.trim(),
+      nextSteps,
+      email: { subject: emailSubject, body: emailBody },
+      raw: text,
+    };
+  };
+
+  // Copy to clipboard
+  const copyText = (text) => {
+    navigator.clipboard.writeText(text).catch(() => {});
+  };
+
+  // Reset to start
+  const reset = () => {
+    setStep('setup');
+    setCallStatus('idle');
+    setTranscript([]);
+    setDebrief(null);
+    setSessionId(null);
+    setCallTimer(0);
+    setInterimText('');
+    if (wsRef.current) wsRef.current.close();
+    clearInterval(timerRef.current);
+  };
+
+  // ─── STATUS TEXT ───
+  const getStatusText = () => {
+    switch (callStatus) {
+      case 'initiating': return "Getting Michael ready...";
+      case 'ringing': return "Michael is calling you now!";
+      case 'connected': return "Call connected";
+      case 'speaking': return "Michael is speaking...";
+      case 'listening': return "Michael is listening...";
+      case 'thinking': return "Michael is thinking...";
+      case 'ended': return "Call complete";
+      default: return "";
+    }
+  };
+
+  const getStatusSub = () => {
+    switch (callStatus) {
+      case 'initiating': return "Hang tight, your phone will ring in a moment.";
+      case 'ringing': return "Pick up your phone to start the conversation with Michael.";
+      case 'connected':
+      case 'speaking':
+      case 'listening':
+      case 'thinking':
+        return "Your conversation is being transcribed live below.";
+      case 'ended': return "Generating your debrief...";
+      default: return "";
+    }
+  };
+
+  // ─── RENDER ───
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <header className="hdr">
+        <div className="hdr-l">
+          <a href="https://mantyl.ai" target="_blank" rel="noopener"><Logo /></a>
+          <div className="hdr-div" />
+          <span className="hdr-name">Michael</span>
+        </div>
+        <div className="hdr-r">
+          <span className="hdr-pill"><span className="hdr-dot" /> BDR Agent</span>
+        </div>
+      </header>
+
+      {/* ─── PAGE 1: SETUP ─── */}
+      {step === 'setup' && (
+        <>
+          <section className="hero">
+            <div className="hero-wrap">
+              <div className="hero-left">
+                <h1 className="hero-h1">Meet <em>Michael</em>, your AI cold caller.</h1>
+                <p className="hero-p">Tell Michael what you're selling and how you want him to sound. He'll call your phone and run a live cold call, showing you exactly how an AI BDR handles the conversation.</p>
+              </div>
+              <div className="hero-right">
+                <div className="michael-showcase">
+                  <div className="michael-bg" />
+                  <div className="michael-ring" />
+                  <img className="michael-img" src="michael.png" alt="Michael — AI BDR Agent" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="section">
+            <div className="card">
+              <h2 className="card-title">Set up your call with Michael</h2>
+              <p className="card-sub">Fill in your details and tell Michael what to sell. He'll call you and pitch it live.</p>
+
+              <div className="fg">
+                <div className={`fi ${errors.firstName ? 'fi-error' : ''}`}>
+                  <label>First Name <span className="required">*</span></label>
+                  <input value={form.firstName} onChange={e => setField('firstName', e.target.value)} placeholder="John" />
+                  {errors.firstName && <span className="fi-error-msg">{errors.firstName}</span>}
+                </div>
+                <div className={`fi ${errors.lastName ? 'fi-error' : ''}`}>
+                  <label>Last Name <span className="required">*</span></label>
+                  <input value={form.lastName} onChange={e => setField('lastName', e.target.value)} placeholder="Doe" />
+                  {errors.lastName && <span className="fi-error-msg">{errors.lastName}</span>}
+                </div>
+                <div className={`fi ${errors.email ? 'fi-error' : ''}`}>
+                  <label>Email <span className="required">*</span></label>
+                  <input type="email" value={form.email} onChange={e => setField('email', e.target.value)} placeholder="john@company.com" />
+                  {errors.email && <span className="fi-error-msg">{errors.email}</span>}
+                </div>
+                <div className={`fi ${errors.phone ? 'fi-error' : ''}`}>
+                  <label>Phone Number <span className="required">*</span></label>
+                  <input type="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} placeholder="+1 555 123 4567" />
+                  {errors.phone && <span className="fi-error-msg">{errors.phone}</span>}
+                </div>
+                <div className={`fi ${errors.company ? 'fi-error' : ''}`}>
+                  <label>Your Company <span className="required">*</span></label>
+                  <input value={form.company} onChange={e => setField('company', e.target.value)} placeholder="Acme Corp" />
+                  {errors.company && <span className="fi-error-msg">{errors.company}</span>}
+                </div>
+                <div className="fi">
+                  <label>Industry</label>
+                  <select value={form.industry} onChange={e => setField('industry', e.target.value)}>
+                    <option value="">Select industry...</option>
+                    <option value="SaaS">SaaS / Software</option>
+                    <option value="Fintech">Fintech</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Professional Services">Professional Services</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Education">Education</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className={`fi fg-full ${errors.selling ? 'fi-error' : ''}`}>
+                  <label>What are you selling? <span className="required">*</span></label>
+                  <textarea
+                    value={form.selling}
+                    onChange={e => setField('selling', e.target.value)}
+                    placeholder="Describe your product or service. What does it do? Who is it for? What problem does it solve? The more detail you give Michael, the better his pitch will be."
+                    rows={4}
+                  />
+                  {errors.selling && <span className="fi-error-msg">{errors.selling}</span>}
+                </div>
+
+                <div className="fi fg-full">
+                  <label>Tone <span className="required">*</span></label>
+                  <div className="tone-grid">
+                    {['professional', 'friendly', 'aggressive', 'consultative'].map(t => (
+                      <div
+                        key={t}
+                        className={`tone-opt ${form.tone === t ? 'active' : ''}`}
+                        onClick={() => setField('tone', t)}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="fi">
+                  <label>Target Role/Title</label>
+                  <input value={form.targetRole} onChange={e => setField('targetRole', e.target.value)} placeholder="VP of Sales, CTO, etc." />
+                </div>
+                <div className="fi">
+                  <label>Key Value Props</label>
+                  <textarea value={form.valueProps} onChange={e => setField('valueProps', e.target.value)} placeholder="Key selling points Michael should hit..." rows={2} />
+                </div>
+                <div className="fi">
+                  <label>Common Objections</label>
+                  <textarea value={form.commonObjections} onChange={e => setField('commonObjections', e.target.value)} placeholder="Objections prospects usually raise..." rows={2} />
+                </div>
+                <div className="fi">
+                  <label>Additional Context</label>
+                  <textarea value={form.additionalContext} onChange={e => setField('additionalContext', e.target.value)} placeholder="Anything else Michael should know..." rows={2} />
+                </div>
+              </div>
+
+              <button className="go-btn" onClick={startCall} disabled={loading}>
+                {loading ? <><span className="spinner" /> Connecting...</> : <>📞 Let Michael Call You</>}
+              </button>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* ─── PAGE 2: LIVE CALL ─── */}
+      {step === 'call' && (
+        <div className="call-page">
+          <div className="call-wrap">
+            <div className="call-left">
+              <div className="call-avatar">
+                <div className={`call-orb ${callStatus === 'ringing' ? 'ringing' : callStatus}`} />
+                <img src="michael.png" alt="Michael" style={{ position: 'relative', zIndex: 2 }} />
+              </div>
+              <div className="call-status">
+                {callStatus === 'ringing' && <div className="call-phone-icon">📞</div>}
+                <div className="call-status-text">{getStatusText()}</div>
+                <div className="call-status-sub">{getStatusSub()}</div>
+                {(callStatus !== 'idle' && callStatus !== 'initiating' && callStatus !== 'ended') && (
+                  <div className="call-timer">{formatTime(callTimer)}</div>
+                )}
+              </div>
+              {callStatus !== 'ended' && callStatus !== 'idle' && callStatus !== 'initiating' && (
+                <button className="call-end-btn" onClick={endCall}>End Call</button>
+              )}
+            </div>
+            <div className="call-right">
+              <div className="transcript-header">
+                <span className="transcript-title">Live Transcript</span>
+                {callStatus !== 'ended' && callStatus !== 'idle' && (
+                  <span className="transcript-status"><span className="transcript-dot" /> Live</span>
+                )}
+              </div>
+              <div className="transcript-box" ref={scrollRef}>
+                {transcript.length === 0 && !interimText && (
+                  <div className="t-empty">
+                    {callStatus === 'ringing'
+                      ? "Waiting for you to pick up..."
+                      : callStatus === 'initiating'
+                        ? "Getting Michael ready..."
+                        : "Transcript will appear here once the conversation starts."}
+                  </div>
+                )}
+                {transcript.map((t, i) => (
+                  <div className="t-msg" key={i}>
+                    <div className={`t-msg-speaker ${t.speaker === 'Michael' ? 'michael' : 'user'}`}>{t.speaker}</div>
+                    <div className="t-msg-text">{t.text}</div>
+                  </div>
+                ))}
+                {interimText && (
+                  <div className="t-msg">
+                    <div className="t-msg-speaker user">{form.firstName || 'You'}</div>
+                    <div className="t-msg-text interim">{interimText}...</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── PAGE 3: DEBRIEF ─── */}
+      {step === 'debrief' && (
+        <>
+          <div className="db-hero">
+            <h2>Call Debrief: <em>{form.firstName} {form.lastName}</em></h2>
+            <p className="db-hero-sub">{form.company} | {formatTime(callTimer)} call | {new Date().toLocaleDateString()}</p>
+            {debrief && !debriefLoading && (
+              <div className="db-meta">
+                <div className="db-meta-item">
+                  <div className="db-meta-label">Meeting Booked</div>
+                  <div className={`db-meta-val ${debrief.meetingBooked === 'YES' ? 'green' : debrief.meetingBooked === 'NO' ? 'red' : ''}`}>
+                    {debrief.meetingBooked}
+                  </div>
+                </div>
+                <div className="db-meta-item">
+                  <div className="db-meta-label">Interest Level</div>
+                  <div className={`db-meta-val ${debrief.interest === 'HIGH' ? 'green' : debrief.interest === 'LOW' ? 'red' : 'yellow'}`}>
+                    {debrief.interest}
+                  </div>
+                </div>
+                <div className="db-meta-item">
+                  <div className="db-meta-label">Call Duration</div>
+                  <div className="db-meta-val">{formatTime(callTimer)}</div>
+                </div>
+                <div className="db-meta-item">
+                  <div className="db-meta-label">Messages</div>
+                  <div className="db-meta-val">{transcript.length}</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {debriefLoading ? (
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <span className="spinner" style={{ width: 32, height: 32, borderColor: 'rgba(107,138,219,.3)', borderTopColor: 'var(--blue)' }} />
+              <p style={{ color: '#64748b', marginTop: 16, fontSize: 14 }}>Generating your call debrief...</p>
+            </div>
+          ) : debrief && (
+            <>
+              <div className="db-tabs">
+                {[
+                  { key: 'summary', label: 'Summary' },
+                  { key: 'steps', label: 'Next Steps' },
+                  { key: 'email', label: 'Follow-Up Email' },
+                  { key: 'transcript', label: 'Transcript' },
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    className={`db-tab ${debriefTab === tab.key ? 'active' : ''}`}
+                    onClick={() => setDebriefTab(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="db-content">
+                {debriefTab === 'summary' && (
+                  <div className="db-panel">
+                    <h3 className="db-section-title">Call Summary</h3>
+                    <div className="db-text">
+                      {debrief.summary.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
+                    </div>
+                    {debrief.meetingDetails && (
+                      <>
+                        <h3 className="db-section-title" style={{ marginTop: 24 }}>Meeting Details</h3>
+                        <div className="db-text">
+                          {debrief.meetingDetails.split('\n').filter(Boolean).map((l, i) => <p key={i}>{l}</p>)}
+                        </div>
+                      </>
+                    )}
+                    <button className="copy-btn" onClick={() => copyText(debrief.summary + '\n\n' + debrief.meetingDetails)}>
+                      Copy Summary
+                    </button>
+                  </div>
+                )}
+
+                {debriefTab === 'steps' && (
+                  <div className="db-panel">
+                    <h3 className="db-section-title">Recommended Next Steps</h3>
+                    <div className="db-text">
+                      {debrief.nextSteps.map((s, i) => (
+                        <p key={i}><strong>{i + 1}.</strong> {s}</p>
+                      ))}
+                      {debrief.nextSteps.length === 0 && <p>No specific next steps generated.</p>}
+                    </div>
+                    <button className="copy-btn" onClick={() => copyText(debrief.nextSteps.map((s, i) => `${i + 1}. ${s}`).join('\n'))}>
+                      Copy Next Steps
+                    </button>
+                  </div>
+                )}
+
+                {debriefTab === 'email' && (
+                  <div className="db-panel">
+                    <h3 className="db-section-title">Draft Follow-Up Email</h3>
+                    <div className="db-email">
+                      <div className="db-email-subject">Subject: {debrief.email.subject}</div>
+                      <div className="db-email-body">
+                        {debrief.email.body.split('\n\n').map((p, i) => <p key={i} style={{ marginBottom: 8 }}>{p}</p>)}
+                      </div>
+                    </div>
+                    <button className="copy-btn" onClick={() => copyText(`Subject: ${debrief.email.subject}\n\n${debrief.email.body}`)}>
+                      Copy Email
+                    </button>
+                  </div>
+                )}
+
+                {debriefTab === 'transcript' && (
+                  <div className="db-panel">
+                    <h3 className="db-section-title">Full Transcript</h3>
+                    <div className="db-transcript">
+                      {transcript.map((t, i) => (
+                        <div className="db-t-line" key={i}>
+                          <div className={`db-t-speaker ${t.speaker === 'Michael' ? 'michael' : 'user'}`}>{t.speaker}</div>
+                          <div className="db-t-text">{t.text}</div>
+                        </div>
+                      ))}
+                      {transcript.length === 0 && (
+                        <p style={{ color: '#94a3b8', padding: 20, textAlign: 'center' }}>No transcript recorded.</p>
+                      )}
+                    </div>
+                    <button className="copy-btn" onClick={() => copyText(transcript.map(t => `${t.speaker}: ${t.text}`).join('\n'))}>
+                      Copy Transcript
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ textAlign: 'center' }}>
+                  <button className="reset-btn" onClick={reset}>Start New Call</button>
+                </div>
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// Mount
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

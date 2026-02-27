@@ -1,0 +1,38 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Call initiation proxy
+[[redirects]]
+  from = "/api/initiate-call"
+  to = "/.netlify/functions/initiate-call"
+  status = 200
+
+# Claude debrief generation
+[[redirects]]
+  from = "/api/debrief"
+  to = "/.netlify/functions/debrief"
+  status = 200
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/michael.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
