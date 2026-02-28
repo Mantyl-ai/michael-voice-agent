@@ -80,7 +80,10 @@ const sessions = new Map();
 
 // ─── Health Check ───
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', agent: 'michael', activeCalls: sessions.size });
+  res.json({ status: 'ok', agent: 'michael', activeCalls: sessions.size, uptime: process.uptime() });
+});
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', uptime: process.uptime() });
 });
 
 // ─── POST /call/initiate — Start a call ───
