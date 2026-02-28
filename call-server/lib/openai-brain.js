@@ -16,13 +16,16 @@ const openai = new OpenAI({
  *
  * @param {string} systemPrompt - Michael's persona + context
  * @param {Array} messages - Conversation history [{role, content}]
+ * @param {Object} options - Optional configuration (e.g., { maxTokens: 80 })
  * @returns {string} Michael's response text
  */
-async function generateResponse(systemPrompt, messages) {
+async function generateResponse(systemPrompt, messages, options = {}) {
+  const maxTokens = options.maxTokens || 200;
+  
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
     temperature: 0.85,
-    max_tokens: 200, // Keep it short — this is a phone call
+    max_tokens: maxTokens, // Keep it short — this is a phone call
     messages: [
       { role: 'system', content: systemPrompt },
       ...messages,
