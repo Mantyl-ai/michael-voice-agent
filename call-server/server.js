@@ -293,8 +293,51 @@ async function handleMediaStream(ws, sessionId) {
   // Initialize Deepgram for real-time STT
   let deepgramConnection = null;
   let isProcessingResponse = false;
-  let audioQueue = [];
+  let audioQueue = []; // Queue audio until Deepgram is ready
 
+  // IMPORTANT: Register the message handler FIRST, before awaiting Deepgram.
+  // Twilio sends 'connected' and 'start' events immediately on WebSocket open.
+  // If we await Deepgram init first, we miss these events and streamSid is never set.
+  ws.on('message', (data) => {
+    try {
+      const msg = JSON.parse(data);
+
+      switch (msg.event) {
+        case 'connected':
+          console.log(`[${sessionId}] Media stream: connected`);
+          break;
+
+        case 'start':
+          session.streamSid = msg.start.streamSid;
+          console.log(`[${sessionId}] Media stream: started (streamSid: ${session.streamSid})`);
+
+          // Send Michael's opening line after a brief pause
+          setTimeout(async () => {
+            await sendOpeningLine(session);
+          }, 1500);
+          break;
+
+        case 'media':
+          // Forward audio to Deepgram for transcription
+          if (deepgramConnection) {
+            const audioData = Buffer.from(msg.media.payload, 'base64');
+            processAudio(deepgramConnection, audioData);
+          } else {
+            // Queue audio until Deepgram is ready
+            audioQueue.push(msg.media.payload);
+          }
+          break;
+
+        case 'stop':
+          console.log(`[${sessionId}] Media stream: stopped`);
+          break;
+      }
+    } catch (err) {
+      console.error(`[${sessionId}] Media message parse error:`, err.message);
+    }
+  });
+
+  // Now initialize Deepgram (the message handler above will queue audio in the meantime)
   try {
     deepgramConnection = await initDeepgram(sessionId, {
       // Called when Deepgram produces a final transcript
@@ -374,48 +417,21 @@ async function handleMediaStream(ws, sessionId) {
         console.error(`[${sessionId}] Deepgram error:`, err);
       },
     });
+
+    // Flush any audio that was queued while Deepgram was initializing
+    if (audioQueue.length > 0) {
+      console.log(`[${sessionId}] Flushing ${audioQueue.length} queued audio packets to Deepgram`);
+      for (const payload of audioQueue) {
+        const audioData = Buffer.from(payload, 'base64');
+        processAudio(deepgramConnection, audioData);
+      }
+      audioQueue = [];
+    }
   } catch (err) {
     console.error(`[${sessionId}] Failed to init Deepgram:`, err.message);
     ws.close();
     return;
   }
-
-  // Handle incoming Twilio Media Stream messages
-  ws.on('message', (data) => {
-    try {
-      const msg = JSON.parse(data);
-
-      switch (msg.event) {
-        case 'connected':
-          console.log(`[${sessionId}] Media stream: connected`);
-          break;
-
-        case 'start':
-          session.streamSid = msg.start.streamSid;
-          console.log(`[${sessionId}] Media stream: started (streamSid: ${session.streamSid})`);
-
-          // Send Michael's opening line after a brief pause
-          setTimeout(async () => {
-            await sendOpeningLine(session);
-          }, 1500);
-          break;
-
-        case 'media':
-          // Forward audio to Deepgram for transcription
-          if (deepgramConnection) {
-            const audioData = Buffer.from(msg.media.payload, 'base64');
-            processAudio(deepgramConnection, audioData);
-          }
-          break;
-
-        case 'stop':
-          console.log(`[${sessionId}] Media stream: stopped`);
-          break;
-      }
-    } catch (err) {
-      console.error(`[${sessionId}] Media message parse error:`, err.message);
-    }
-  });
 
   ws.on('close', () => {
     console.log(`[${sessionId}] Media stream closed`);
