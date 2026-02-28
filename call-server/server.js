@@ -527,31 +527,12 @@ async function handleMediaStream(ws, sessionId) {
           break;
 
         case 'media':
-          // ─── Enterprise: Barge-in detection ───
-          // If we're currently sending Michael's audio and we receive user audio,
-          // the prospect is trying to interrupt
-          if (session.isSpeaking && deepgramConnection) {
-            // User is speaking while Michael is talking = barge-in!
-            session.bargeInCount++;
-            session.isSpeaking = false;
-
-            // Abort the current audio send
-            if (session.bargeInAbort) {
-              session.bargeInAbort.abort();
-              session.bargeInAbort = null;
-            }
-
-            // Clear Twilio's audio buffer so Michael stops talking immediately
-            if (session.mediaWs && session.mediaWs.readyState === WebSocket.OPEN && session.streamSid) {
-              session.mediaWs.send(JSON.stringify({
-                event: 'clear',
-                streamSid: session.streamSid,
-              }));
-            }
-
-            console.log(`[${sessionId}] BARGE-IN detected (count: ${session.bargeInCount}) — cleared audio stream`);
-            broadcastToUI(sessionId, { type: 'barge_in', count: session.bargeInCount });
-          }
+          // ─── NOTE: Barge-in is handled at the Deepgram level (onTranscript) ───
+          // We do NOT trigger barge-in on raw media packets because Twilio sends
+          // continuous audio in both directions — ambient noise and echo would
+          // cause false-positive barge-ins on every single response, clipping the
+          // beginning of Michael's speech. Instead, we rely on Deepgram to detect
+          // actual speech content before interrupting.
 
           // Forward audio to Deepgram for transcription
           if (deepgramConnection) {
@@ -576,6 +557,14 @@ async function handleMediaStream(ws, sessionId) {
   async function processUserTurn(fullText) {
     if (!fullText.trim()) return;
     if (isProcessingResponse) return;
+
+    // ─── Guard: If meeting is already booked, do NOT generate any more responses ───
+    // The hangup timer is already ticking — just ignore any new speech from the prospect.
+    if (session.meetingBooked) {
+      console.log(`[${sessionId}] Meeting already booked — ignoring user speech: "${fullText}"`);
+      return;
+    }
+
     if (session.openingCooldown) {
       console.log(`[${sessionId}] User speech during opening cooldown (queued, no response): "${fullText}"`);
       session.addMessage('user', fullText);
@@ -659,6 +648,39 @@ async function handleMediaStream(ws, sessionId) {
       return;
     }
 
+    // ─── PRE-RESPONSE: Check if the user just confirmed a meeting that Michael ALREADY CONFIRMED ───
+    // This fires ONLY when Michael's LAST message already contains the full booking confirmation
+    // (e.g., "I've got you down for Thursday, March 5th at 2:00 PM. I'll send over a calendar invite.")
+    // We use strict mode so that a mere proposal ("How about Thursday?") does NOT trigger this —
+    // Michael must have explicitly confirmed the booking before we hang up without generating a response.
+    const lastMichaelMsg = [...session.messages].reverse().find(m => m.role === 'assistant');
+    const lastMichaelText = lastMichaelMsg?.content || '';
+    if (detectMeetingBooked(lastMichaelText, fullText, { requireExplicitConfirmation: true })) {
+      // Meeting is 100% confirmed — Michael already said the confirmation, user just agreed.
+      // Do NOT generate another response. Just hang up cleanly.
+      session.meetingBooked = true;
+      isProcessingResponse = true;
+      console.log(`[${sessionId}] Meeting CONFIRMED (pre-response check). User said: "${fullText}". Hanging up immediately.`);
+      broadcastToUI(sessionId, {
+        type: 'meeting_booked',
+        message: 'Michael has booked a meeting!',
+      });
+
+      // Estimate how long Michael's last audio is still playing (if any), then hang up
+      const hangupDelay = session.isSpeaking ? 3000 : 1000;
+      setTimeout(async () => {
+        try {
+          if (session.callSid) {
+            console.log(`[${sessionId}] Hanging up after confirmed meeting.`);
+            await twilioClient.calls(session.callSid).update({ status: 'completed' });
+          }
+        } catch (hangupErr) {
+          console.error(`[${sessionId}] Error hanging up after meeting confirm:`, hangupErr.message);
+        }
+      }, hangupDelay);
+      return; // Do NOT generate another response
+    }
+
     // Generate Michael's response
     isProcessingResponse = true;
     broadcastToUI(sessionId, { type: 'status', value: 'thinking' });
@@ -693,7 +715,7 @@ async function handleMediaStream(ws, sessionId) {
         console.error(`[${sessionId}] SKIPPED audio send! audioBuffer=${!!audioBuffer}, mediaWs=${!!session.mediaWs}, streamSid=${!!session.streamSid}`);
       }
 
-      // Check if meeting was booked (simple heuristic)
+      // Check if meeting was booked (post-response — Michael just proposed the meeting)
       if (detectMeetingBooked(response, fullText)) {
         session.meetingBooked = true;
         broadcastToUI(sessionId, {
@@ -701,46 +723,20 @@ async function handleMediaStream(ws, sessionId) {
           message: 'Michael has booked a meeting!',
         });
 
-        // Gracefully end the call after meeting is booked
-        console.log(`[${sessionId}] Meeting booked! Starting graceful close (15-20s grace period)...`);
+        // Michael's response already contains the confirmation + goodbye.
+        // Wait for the audio to finish playing, then hang up. No extra closing line needed.
+        const estimatedAudioMs = audioBuffer ? Math.ceil((audioBuffer.length / 8000) * 1000) : 5000;
+        console.log(`[${sessionId}] Meeting booked! Hanging up after audio finishes (~${estimatedAudioMs}ms + 2s buffer)...`);
         setTimeout(async () => {
           try {
-            const closingPrompt = 'The prospect just confirmed a specific meeting date and time. Say a warm, natural goodbye that: (1) confirms you will send a calendar invite to their email, (2) briefly thanks them for their time, (3) wishes them a great day. Keep it to 2-3 sentences. Sound natural and warm, not robotic.';
-            const closingResponse = await generateResponse(closingPrompt, session.messages);
-
-            if (closingResponse) {
-              session.addMessage('assistant', closingResponse);
-              broadcastToUI(sessionId, { type: 'michael_speech', text: closingResponse });
-              broadcastToUI(sessionId, { type: 'status', value: 'speaking' });
-
-              const closingAudio = await synthesizeSpeech(closingResponse);
-              if (closingAudio && session.mediaWs && session.streamSid) {
-                await sendAudioToTwilio(session.mediaWs, session.streamSid, closingAudio, sessionId);
-              }
+            if (session.callSid) {
+              console.log(`[${sessionId}] Audio finished. Hanging up call ${session.callSid}`);
+              await twilioClient.calls(session.callSid).update({ status: 'completed' });
             }
-
-            console.log(`[${sessionId}] Closing audio sent. Waiting 18s grace period before hangup...`);
-            setTimeout(async () => {
-              try {
-                if (session.callSid) {
-                  console.log(`[${sessionId}] Grace period over. Hanging up call ${session.callSid}`);
-                  await twilioClient.calls(session.callSid).update({ status: 'completed' });
-                }
-              } catch (hangupErr) {
-                console.error(`[${sessionId}] Error hanging up call:`, hangupErr.message);
-              }
-            }, 18000);
-          } catch (closeErr) {
-            console.error(`[${sessionId}] Error in graceful close:`, closeErr.message);
-            setTimeout(async () => {
-              try {
-                if (session.callSid) {
-                  await twilioClient.calls(session.callSid).update({ status: 'completed' });
-                }
-              } catch (e) {}
-            }, 15000);
+          } catch (hangupErr) {
+            console.error(`[${sessionId}] Error hanging up call:`, hangupErr.message);
           }
-        }, 2000);
+        }, estimatedAudioMs + 2000);
       }
     } catch (err) {
       console.error(`[${sessionId}] Response generation error:`, err.message);
@@ -762,8 +758,12 @@ async function handleMediaStream(ws, sessionId) {
             text,
           });
 
-          // ─── Enterprise: Barge-in — interim speech during Michael talking ───
-          if (session.isSpeaking && text.trim().length > 0) {
+          // ─── Enterprise: Barge-in — actual speech detected during Michael talking ───
+          // This is the ONLY barge-in layer. It fires when Deepgram detects real speech
+          // (not ambient noise). 500ms grace period protects against echo of Michael's
+          // own voice bleeding through the prospect's microphone at the start of playback.
+          if (session.isSpeaking && text.trim().length > 0 &&
+              (Date.now() - (session.speakingStartedAt || 0)) > 500) {
             session.bargeInCount++;
             session.isSpeaking = false;
             if (session.bargeInAbort) {
@@ -928,6 +928,7 @@ async function sendAudioToTwilio(mediaWs, streamSid, mulawBuffer, sessionId = 'u
   // ─── Enterprise: Mark that Michael is speaking (for barge-in detection) ───
   if (session) {
     session.isSpeaking = true;
+    session.speakingStartedAt = Date.now(); // Grace period: ignore barge-in for first ~800ms
     // Create an abort controller for this audio send
     const abortController = new AbortController();
     session.bargeInAbort = abortController;
@@ -1042,7 +1043,19 @@ function broadcastToUI(sessionId, data) {
 }
 
 // ─── Detect if a meeting was booked (STRICT — requires explicit date+time confirmation) ───
-function detectMeetingBooked(michaelText, userText) {
+//
+// options.requireExplicitConfirmation (default: false)
+//   When true (used by the PRE-response check), Michael's text must contain explicit
+//   booking confirmation language ("I've got you down", "calendar invite", etc.) —
+//   NOT just a proposal ("How about Thursday?"). This prevents the call from hanging up
+//   before Michael confirms back to the prospect.
+//
+//   When false (used by the POST-response check), any scheduling language from Michael
+//   is accepted since Michael's response was just generated and should contain the
+//   confirmation naturally.
+//
+function detectMeetingBooked(michaelText, userText, options = {}) {
+  const { requireExplicitConfirmation = false } = options;
   const michaelLower = (michaelText || '').toLowerCase();
   const userLower = (userText || '').toLowerCase();
   const combined = `${michaelLower} ${userLower}`;
@@ -1076,12 +1089,18 @@ function detectMeetingBooked(michaelText, userText) {
     'sounds good', 'sounds great', 'sounds perfect',
     'perfect let\'s do', 'yes that works', 'yeah that works',
     'sure that works', 'ok that works', 'great see you',
+    'should work', 'think it should work', 'think that works',
+    'that should be fine', 'that\'s fine', 'i can make that work',
+    'i think so', 'i believe so', 'that should work',
+    'i can do that time', 'i can make it', 'i\'m free then',
+    'ok sounds good', 'okay sounds good', 'okay great',
   ];
   const confirmWithTimePatterns = [
-    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(works|is good|is fine|is perfect)\b/i,
-    /\b\d{1,2}\s*(am|pm)\s+(works|is good|is fine|is perfect)\b/i,
-    /\b(yes|yeah|yep|sure).{0,20}(works|book|schedule|perfect|great|do it|see you)/i,
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(works|is good|is fine|is perfect|should work)\b/i,
+    /\b\d{1,2}\s*(am|pm)\s+(works|is good|is fine|is perfect|should work)\b/i,
+    /\b(yes|yeah|yep|sure|ok|okay).{0,20}(works|book|schedule|perfect|great|do it|see you|sounds good)/i,
     /\b(works|perfect|great).{0,20}(see you|looking forward|i'll be there)/i,
+    /\bi\s+think\s+(it\s+)?(should|could|will)\s+work/i,
   ];
 
   const prospectConfirmed = confirmPhrases.some(phrase => userLower.includes(phrase))
@@ -1089,19 +1108,43 @@ function detectMeetingBooked(michaelText, userText) {
 
   if (!prospectConfirmed) return false;
 
-  // Step 4: Michael must have proposed the meeting with scheduling language
-  const schedulingPhrases = [
-    'how about', 'does that work', 'would that work', 'can you do',
-    'let me book', 'i\'ll send', 'calendar invite',
-    'schedule', 'book a time', 'set up a meeting',
-    'i\'ve got you down', 'pencil you in', 'block off',
-    'work for you',
-  ];
-  const michaelProposed = schedulingPhrases.some(phrase => michaelLower.includes(phrase));
+  // Step 4: Michael must have used scheduling language.
+  //
+  // In STRICT mode (pre-response check): Michael must have already explicitly CONFIRMED
+  // the booking — not just proposed a time. This ensures we don't hang up before Michael
+  // says "I've got you down for..." and mentions sending a calendar invite.
+  //
+  // In NORMAL mode (post-response check): Any scheduling language is accepted since
+  // Michael's response was just generated.
 
-  if (!michaelProposed) return false;
+  if (requireExplicitConfirmation) {
+    // STRICT: Only explicit booking confirmation language from Michael
+    const confirmationPhrases = [
+      'i\'ve got you down', 'got you down for', 'i have you down',
+      'calendar invite', 'send over a calendar', 'send you a calendar',
+      'i\'ll send', 'pencil you in', 'you\'re booked',
+      'booked for', 'confirmed for', 'set up for',
+      'you\'re all set', 'all set for',
+      'talk soon', 'talk to you',
+    ];
+    const michaelConfirmed = confirmationPhrases.some(phrase => michaelLower.includes(phrase));
+    if (!michaelConfirmed) return false;
+  } else {
+    // NORMAL: Any scheduling language (proposals + confirmations)
+    const schedulingPhrases = [
+      'how about', 'does that work', 'would that work', 'can you do',
+      'let me book', 'i\'ll send', 'calendar invite',
+      'schedule', 'book a time', 'set up a meeting',
+      'i\'ve got you down', 'got you down for', 'pencil you in', 'block off',
+      'work for you', 'talk soon', 'looking forward to it',
+      'have a great', 'have a good',
+    ];
+    const michaelProposed = schedulingPhrases.some(phrase => michaelLower.includes(phrase));
+    if (!michaelProposed) return false;
+  }
 
-  console.log(`[detectMeetingBooked] TRIGGERED — Michael: "${michaelText}", User: "${userText}"`);
+  const mode = requireExplicitConfirmation ? 'STRICT/pre-response' : 'NORMAL/post-response';
+  console.log(`[detectMeetingBooked] TRIGGERED (${mode}) — Michael: "${michaelText}", User: "${userText}"`);
   return true;
 }
 

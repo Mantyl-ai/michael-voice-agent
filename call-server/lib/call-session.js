@@ -44,6 +44,7 @@ class CallSession {
 
     // ─── Enterprise: Barge-in detection ───
     this.isSpeaking = false;       // true when Michael's TTS audio is being sent
+    this.speakingStartedAt = 0;    // timestamp when current audio playback started (for grace period)
     this.bargeInAbort = null;      // AbortController to cancel mid-send audio
     this.bargeInCount = 0;         // how many times prospect interrupted
 
