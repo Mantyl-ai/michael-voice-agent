@@ -199,29 +199,20 @@ app.post('/call/initiate', async (req, res) => {
     console.log(`[${sessionId}] Webhook URL: ${serverUrl}/call/webhook/${sessionId}`);
 
     // Initiate outbound call via Twilio
-    // Enterprise: AMD (Answering Machine Detection) is ASYNC only — it runs in background
-    // and does NOT block or delay the media stream connection. This prevents the "silent call" bug
-    // where DetectMessageEnd holds the stream while analyzing the greeting.
-    const callParams = {
+    // Enterprise: Async AMD runs in background — does NOT block media stream
+    const call = await twilioClient.calls.create({
       to: phone,
       from: TWILIO_PHONE_NUMBER,
       url: `${serverUrl}/call/webhook/${sessionId}`,
       statusCallback: `${serverUrl}/call/status/${sessionId}`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST',
+      machineDetection: 'Enable',   // 'Enable' returns result immediately (faster than 'DetectMessageEnd')
+      asyncAmd: true,                // Runs in background, doesn't block call flow
+      asyncAmdStatusCallback: `${serverUrl}/call/amd/${sessionId}`,
+      asyncAmdStatusCallbackMethod: 'POST',
       timeout: 30,
-    };
-
-    // Only enable AMD if env var is set — it can cause stream delays on some carriers
-    if (process.env.ENABLE_AMD === 'true') {
-      callParams.machineDetection = 'Enable'; // 'Enable' is faster than 'DetectMessageEnd'
-      callParams.asyncAmd = true;
-      callParams.asyncAmdStatusCallback = `${serverUrl}/call/amd/${sessionId}`;
-      callParams.asyncAmdStatusCallbackMethod = 'POST';
-      console.log(`[${sessionId}] AMD enabled (async)`);
-    }
-
-    const call = await twilioClient.calls.create(callParams);
+    });
 
     session.callSid = call.sid;
     session.status = 'initiating';
@@ -856,8 +847,10 @@ async function handleMediaStream(ws, sessionId) {
     }
   } catch (err) {
     console.error(`[${sessionId}] Failed to init Deepgram:`, err.message);
-    ws.close();
-    return;
+    console.error(`[${sessionId}] WARNING: Call will continue without STT — Michael can still deliver opening line`);
+    // Do NOT close the WebSocket here! The media stream must stay open
+    // so Michael's opening line can still play. The call will be one-way
+    // (Michael speaks but can't hear) but at least it won't be dead silent.
   }
 
   ws.on('close', () => {

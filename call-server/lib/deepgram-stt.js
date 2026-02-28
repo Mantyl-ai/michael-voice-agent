@@ -85,8 +85,9 @@ async function initDeepgram(sessionId, { onTranscript, onUtteranceEnd, onError }
     endpointing: 400,
     punctuate: true,
     filler_words: true,
-    // Enterprise: Enable language detection
-    detect_language: true,
+    // Note: detect_language is NOT compatible with specifying language='en-US'
+    // Deepgram returns 400 if both are set. Language detection is handled
+    // via Deepgram's automatic language metadata in the transcript response.
   });
 
   return new Promise((resolve, reject) => {
