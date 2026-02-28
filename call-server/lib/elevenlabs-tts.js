@@ -8,7 +8,9 @@
  * Then converts mp3 → raw PCM → mulaw using ffmpeg.
  */
 
-const { execSync } = require('child_process');
+const { exec } = require('child_process');
+const util = require('util');
+const execAsync = util.promisify(exec);
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -72,8 +74,8 @@ async function synthesizeSpeech(text) {
       return null;
     }
 
-    // Convert mp3 → mulaw 8kHz using ffmpeg
-    const mulawBuffer = convertToMulaw(mp3Buffer);
+    // Convert mp3 → mulaw 8kHz using ffmpeg (async — won't block event loop)
+    const mulawBuffer = await convertToMulaw(mp3Buffer);
     const totalTime = Date.now() - startTime;
 
     if (mulawBuffer) {
@@ -94,10 +96,14 @@ async function synthesizeSpeech(text) {
  * Convert mp3 audio to mulaw 8kHz mono using ffmpeg.
  * Twilio Media Streams require mulaw (G.711 u-law) at 8kHz sample rate.
  *
+ * IMPORTANT: Uses async exec to avoid blocking the event loop.
+ * Blocking the event loop during conversion prevents WebSocket ping/pong
+ * processing, which causes Twilio and Deepgram to disconnect mid-call.
+ *
  * @param {Buffer} mp3Buffer - MP3 audio data
- * @returns {Buffer} Mulaw audio data
+ * @returns {Buffer|null} Mulaw audio data, or null on failure
  */
-function convertToMulaw(mp3Buffer) {
+async function convertToMulaw(mp3Buffer) {
   const tmpDir = os.tmpdir();
   const ts = Date.now();
   const inputPath = path.join(tmpDir, `michael-tts-${ts}.mp3`);
@@ -108,12 +114,12 @@ function convertToMulaw(mp3Buffer) {
     fs.writeFileSync(inputPath, mp3Buffer);
     console.log(`[TTS] Wrote ${mp3Buffer.length} bytes to ${inputPath}`);
 
-    // Convert with ffmpeg: mp3 → mulaw 8kHz mono
-    const ffmpegOutput = execSync(
-      `ffmpeg -y -i "${inputPath}" -ar 8000 -ac 1 -f mulaw "${outputPath}" 2>&1`,
-      { stdio: 'pipe', timeout: 10000 }
+    // Convert with ffmpeg: mp3 → mulaw 8kHz mono (ASYNC — does not block event loop)
+    const { stderr } = await execAsync(
+      `ffmpeg -y -i "${inputPath}" -ar 8000 -ac 1 -f mulaw "${outputPath}"`,
+      { timeout: 10000 }
     );
-    console.log(`[TTS] ffmpeg output: ${ffmpegOutput.toString().substring(0, 200)}`);
+    if (stderr) console.log(`[TTS] ffmpeg: ${stderr.substring(0, 200)}`);
 
     // Read converted audio
     const mulawBuffer = fs.readFileSync(outputPath);
@@ -121,7 +127,7 @@ function convertToMulaw(mp3Buffer) {
     return mulawBuffer;
   } catch (err) {
     console.error(`[TTS] ffmpeg conversion error: ${err.message}`);
-    if (err.stderr) console.error(`[TTS] ffmpeg stderr: ${err.stderr.toString().substring(0, 500)}`);
+    if (err.stderr) console.error(`[TTS] ffmpeg stderr: ${err.stderr.substring(0, 500)}`);
     return null;
   } finally {
     // Clean up temp files
