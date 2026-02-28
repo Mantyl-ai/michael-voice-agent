@@ -421,10 +421,12 @@ wss.on('connection', (ws, req) => {
 
 // ─── Enterprise: Opt-out keyword detection ───
 const OPT_OUT_PATTERNS = [
-  /\b(stop|quit|cancel|unsubscribe)\b/i,
+  /\b(quit|cancel|unsubscribe)\b/i,
+  /\bstop\s*(calling|contacting|this|it)\b/i, // "stop calling me" — context-specific
+  /\bstop\s*$/i, // standalone "stop" at end of utterance
   /\btake me off/i,
-  /\bdon't call (me |again)/i,
-  /\bremove (me |my number)/i,
+  /\bdon't call (me|again)/i,
+  /\bremove (me|my number)/i,
   /\bdo not call/i,
   /\bno more calls/i,
 ];
