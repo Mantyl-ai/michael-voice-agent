@@ -14,11 +14,12 @@
   to = "/.netlify/functions/debrief"
   status = 200
 
-# SPA fallback
+# SPA fallback — force=false so real files (images, etc.) are served directly
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
 
 [build.environment]
   NODE_VERSION = "18"

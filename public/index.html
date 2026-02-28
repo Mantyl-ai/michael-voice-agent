@@ -274,33 +274,26 @@ function App() {
     if (errors[key]) setErrors(e => ({ ...e, [key]: null }));
   };
 
-  // Format phone for display: +1 (XXX) XXX-XXXX
-  const formatPhoneDisplay = (raw) => {
-    const digits = raw.replace(/\D/g, '');
-    // Strip leading 1 for US formatting
-    const usDigits = digits.length === 11 && digits[0] === '1' ? digits.slice(1) : digits;
-    if (usDigits.length === 0) return '';
-    if (usDigits.length <= 3) return `+1 (${usDigits}`;
-    if (usDigits.length <= 6) return `+1 (${usDigits.slice(0,3)}) ${usDigits.slice(3)}`;
-    return `+1 (${usDigits.slice(0,3)}) ${usDigits.slice(3,6)}-${usDigits.slice(6,10)}`;
-  };
-
-  // Handle phone input — auto-format as user types
-  const handlePhoneChange = (e) => {
-    const raw = e.target.value;
-    // Allow user to clear
-    if (!raw) { setField('phone', ''); return; }
-    const formatted = formatPhoneDisplay(raw);
-    setField('phone', formatted);
-  };
-
-  // Normalize phone to E.164 format (+1XXXXXXXXXX) for API
+  // Normalize phone to E.164 format (+1XXXXXXXXXX) for API submission
   const normalizePhone = (raw) => {
     const digits = raw.replace(/\D/g, '');
-    if (digits.length === 10) return `+1${digits}`;       // US number without country code
-    if (digits.length === 11 && digits[0] === '1') return `+${digits}`; // US with leading 1
-    if (raw.trim().startsWith('+')) return `+${digits}`;   // International
+    if (digits.length === 10) return `+1${digits}`;
+    if (digits.length === 11 && digits[0] === '1') return `+${digits}`;
     return `+${digits}`;
+  };
+
+  // Display-friendly version shown below the input after blur
+  const [phonePreview, setPhonePreview] = useState('');
+  const handlePhoneBlur = () => {
+    const digits = form.phone.replace(/\D/g, '');
+    const d = digits.length === 11 && digits[0] === '1' ? digits.slice(1) : digits;
+    if (d.length === 10) {
+      setPhonePreview(`Will call: +1 (${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`);
+    } else if (digits.length > 0) {
+      setPhonePreview('');
+    } else {
+      setPhonePreview('');
+    }
   };
 
   // Validate form
@@ -621,8 +614,9 @@ function App() {
                 </div>
                 <div className={`fi ${errors.phone ? 'fi-error' : ''}`}>
                   <label>Phone Number <span className="required">*</span></label>
-                  <input type="tel" value={form.phone} onChange={handlePhoneChange} placeholder="+1 (347) 990-8998" maxLength={18} />
-                  <span style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px'}}>US numbers only. Format: +1 (XXX) XXX-XXXX</span>
+                  <input type="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} onBlur={handlePhoneBlur} placeholder="3479908998" />
+                  {phonePreview && <span style={{fontSize:'11px',color:'var(--green)',marginTop:'2px'}}>{phonePreview}</span>}
+                  {!phonePreview && <span style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px'}}>Enter your 10-digit US number (any format)</span>}
                   {errors.phone && <span className="fi-error-msg">{errors.phone}</span>}
                 </div>
                 <div className={`fi ${errors.company ? 'fi-error' : ''}`}>
