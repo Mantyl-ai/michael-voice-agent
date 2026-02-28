@@ -207,8 +207,8 @@ app.post('/call/initiate', async (req, res) => {
       statusCallback: `${serverUrl}/call/status/${sessionId}`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST',
-      machineDetection: 'Enable',   // 'Enable' returns result immediately (faster than 'DetectMessageEnd')
-      asyncAmd: true,                // Runs in background, doesn't block call flow
+      machineDetection: 'DetectMessageEnd', // Waits for greeting to finish — needed for machine_end_* values in AMD handler
+      asyncAmd: true,                       // Runs in background, doesn't block call flow
       asyncAmdStatusCallback: `${serverUrl}/call/amd/${sessionId}`,
       asyncAmdStatusCallbackMethod: 'POST',
       timeout: 30,
