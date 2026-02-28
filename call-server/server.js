@@ -783,6 +783,9 @@ async function handleMediaStream(ws, sessionId) {
         if (!text.trim()) return;
 
         // ─── Enterprise: Language detection ───
+        // NOTE: Currently disabled because detect_language and language='en-US' are
+        // incompatible in Deepgram (causes 400). detectedLanguage will always be null.
+        // To re-enable: remove language='en-US' from deepgram-stt.js and add detect_language: true.
         if (metadata?.detectedLanguage && metadata.detectedLanguage !== 'en' && metadata.detectedLanguage !== 'en-US') {
           if (!session.nonEnglishDetected) {
             session.nonEnglishDetected = true;
@@ -1119,7 +1122,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`ENV check — OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'set' : 'MISSING'}`);
   console.log(`ENV check — ELEVENLABS_API_KEY: ${process.env.ELEVENLABS_API_KEY ? 'set' : 'MISSING'}`);
   console.log(`ENV check — DEEPGRAM_API_KEY: ${process.env.DEEPGRAM_API_KEY ? 'set' : 'MISSING'}`);
-  console.log(`Enterprise features: barge-in, AMD, sentiment, TCPA, semantic-turn, TTS-cache, scoring, gatekeeper, language-detect, callback`);
+  console.log(`Enterprise features: barge-in, AMD, sentiment, TCPA, semantic-turn, TTS-cache, scoring, gatekeeper, callback`);
 
   // Self-check: verify port is actually accepting connections
   const http = require('http');
