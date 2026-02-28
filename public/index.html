@@ -36,25 +36,30 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .hdr-book{padding:6px 16px;background:var(--grad);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .15s}
 .hdr-book:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,138,219,.3)}
 
-/* ─── HERO (centered single-column layout) ─── */
+/* ─── HERO (2-column layout) ─── */
 .hero{background:var(--navy);position:relative;overflow:hidden;padding:40px 28px 32px;text-align:center}
 .hero-grid{position:absolute;inset:0;background-image:
   linear-gradient(rgba(107,138,219,.06) 1px,transparent 1px),
   linear-gradient(90deg,rgba(107,138,219,.06) 1px,transparent 1px);
   background-size:48px 48px;pointer-events:none}
 .hero::before{content:'';position:absolute;inset:0;background:
-  radial-gradient(ellipse 60% 50% at 50% 40%,rgba(107,138,219,.2) 0%,transparent 60%),
-  radial-gradient(ellipse 40% 60% at 50% 80%,rgba(155,127,199,.12) 0%,transparent 55%);pointer-events:none;z-index:1}
-.hero-content{position:relative;z-index:2;max-width:800px;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+  radial-gradient(ellipse 60% 50% at 50% 40%,rgba(107,138,219,.25) 0%,transparent 60%),
+  radial-gradient(ellipse 40% 60% at 50% 80%,rgba(155,127,199,.15) 0%,transparent 55%);pointer-events:none;z-index:1}
+.hero-content{position:relative;z-index:2;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;align-items:center}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(107,138,219,.1);border:1px solid rgba(107,138,219,.2);border-radius:20px;font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
-.hero-h1{font-size:48px;font-weight:900;color:#fff;line-height:1.06;letter-spacing:-1.5px;margin-bottom:12px}
+.hero-h1{font-size:52px;font-weight:900;color:#fff;line-height:1.06;letter-spacing:-1.5px;margin-bottom:24px}
 .hero-h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-p{font-size:15px;color:#94a3b8;line-height:1.6;max-width:620px;margin:0 auto 20px;text-align:center}
-.hero-stats{display:flex;gap:24px;margin-bottom:20px}
-.hero-stat{display:flex;flex-direction:column;align-items:center}
-.hero-stat-val{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}
-.hero-stat-label{font-size:11px;color:#64748b;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-.hero-showcase-wrap{position:relative;display:flex;flex-direction:column;align-items:center;margin-bottom:16px}
+/* 2-column grid: Michael LEFT, features RIGHT */
+.hero-two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;width:100%;max-width:1100px}
+.hero-col-left{display:flex;flex-direction:column;align-items:center}
+.hero-col-right{display:flex;flex-direction:column;gap:14px}
+.hero-showcase-wrap{position:relative;display:flex;flex-direction:column;align-items:center;margin-bottom:8px}
+/* Scroll indicator */
+.scroll-indicator{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px;cursor:pointer;opacity:.6;transition:opacity .3s}
+.scroll-indicator:hover{opacity:1}
+.scroll-indicator-text{color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.scroll-indicator-chevron{width:20px;height:20px;border-right:2px solid #94a3b8;border-bottom:2px solid #94a3b8;transform:rotate(45deg);animation:scroll-bounce 2s ease-in-out infinite}
+@keyframes scroll-bounce{0%,100%{transform:rotate(45deg) translate(0,0);opacity:.4}50%{transform:rotate(45deg) translate(4px,4px);opacity:1}}
 /* Floating badges around Michael */
 .hero-float-badge{position:absolute;z-index:10;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:11px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;animation:float-badge 4s ease-in-out infinite}
 .hero-float-badge .hfb-dot{width:6px;height:6px;border-radius:50%}
@@ -84,35 +89,44 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 @keyframes voice-wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
 .voice-preview-text{color:rgba(255,255,255,.8);font-size:13px;font-weight:600}
 
-/* Michael showcase — larger, more prominent */
+/* Michael showcase — Apple Intelligence / Siri-level bright orb */
 .michael-showcase{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
-.michael-bg{position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(107,138,219,.35) 0%,rgba(155,127,199,.3) 25%,rgba(212,132,154,.25) 50%,transparent 100%);filter:blur(50px);animation:glow-breathe 6s ease-in-out infinite}
-.michael-ring{position:absolute;width:280px;height:280px;border-radius:50%;border:1.5px solid rgba(107,138,219,.12);animation:ring-pulse 4s ease-in-out infinite}
+.michael-bg{position:absolute;width:360px;height:360px;border-radius:50%;background:conic-gradient(from 0deg,rgba(107,138,219,.9),rgba(155,127,199,.8),rgba(212,132,154,.8),rgba(232,158,108,.7),rgba(107,138,219,.9));filter:blur(55px);animation:glow-breathe 5s ease-in-out infinite;opacity:1}
+.michael-bg-inner{position:absolute;width:280px;height:280px;border-radius:50%;background:conic-gradient(from 180deg,rgba(107,138,219,.7),rgba(155,127,199,.6),rgba(212,132,154,.7),rgba(232,158,108,.5),rgba(107,138,219,.7));filter:blur(30px);animation:glow-breathe-inner 4s ease-in-out infinite reverse;opacity:.8}
+.michael-ring{position:absolute;width:290px;height:290px;border-radius:50%;border:1.5px solid rgba(107,138,219,.2);animation:ring-pulse 4s ease-in-out infinite}
 @keyframes ring-pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
-@keyframes glow-breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.08);opacity:1}}
-.michael-showcase.preview-active .michael-bg{opacity:1;filter:blur(40px);animation:glow-breathe 2s ease-in-out infinite}
-.michael-showcase.preview-active .michael-ring{border-color:rgba(107,138,219,.25);transform:scale(1.05)}
-.michael-img{position:relative;z-index:2;width:260px;height:260px;object-fit:cover;object-position:top center;border-radius:50%;filter:drop-shadow(0 16px 48px rgba(0,0,0,.5));border:3px solid rgba(255,255,255,.08)}
+@keyframes glow-breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.1);opacity:1}}
+@keyframes glow-breathe-inner{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.05);opacity:.9}}
+.michael-showcase.preview-active .michael-bg{opacity:1;filter:blur(45px);animation:glow-breathe-active 2s ease-in-out infinite;box-shadow:0 0 80px 30px rgba(107,138,219,.4),0 0 160px 60px rgba(155,127,199,.3)}
+.michael-showcase.preview-active .michael-bg-inner{opacity:1;filter:blur(22px);animation:glow-breathe-inner 1.5s ease-in-out infinite}
+.michael-showcase.preview-active .michael-ring{border-color:rgba(107,138,219,.4);transform:scale(1.05)}
+@keyframes glow-breathe-active{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:1}}
+.michael-img{position:relative;z-index:2;width:260px;height:260px;object-fit:cover;object-position:top center;border-radius:50%;filter:drop-shadow(0 16px 48px rgba(0,0,0,.5));border:3px solid rgba(255,255,255,.1)}
 
-/* ─── FLOATING FEATURE BOXES ─── */
-.features-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:1100px;margin:0 auto 24px;position:relative;z-index:2}
-.feature-box{background:rgba(255,255,255,.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;text-align:left;transition:all .3s}
-.feature-box:hover{background:rgba(255,255,255,.08);border-color:rgba(107,138,219,.25);transform:translateY(-4px)}
+/* ─── FEATURE BOXES (stacked on right col) ─── */
+.features-col{display:flex;flex-direction:column;gap:14px}
+.feature-box{background:rgba(255,255,255,.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 22px;text-align:left;transition:all .3s;animation:feature-slide-in .6s ease both}
+.feature-box:nth-child(1){animation-delay:.1s}
+.feature-box:nth-child(2){animation-delay:.25s}
+.feature-box:nth-child(3){animation-delay:.4s}
+@keyframes feature-slide-in{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.feature-box:hover{background:rgba(255,255,255,.08);border-color:rgba(107,138,219,.25);transform:translateY(-4px);box-shadow:0 8px 32px rgba(107,138,219,.15)}
 .feature-icon{margin-bottom:6px;width:28px;height:28px}
 .feature-icon svg{width:28px;height:28px}
-.feature-title{color:#fff;font-size:13px;font-weight:700;margin-bottom:3px}
-.feature-desc{color:#94a3b8;font-size:11px;line-height:1.5}
+.feature-title{color:#fff;font-size:14px;font-weight:700;margin-bottom:4px}
+.feature-desc{color:#94a3b8;font-size:12px;line-height:1.5}
 
-/* ─── STEP INDICATORS ─── */
-.steps-row{display:flex;align-items:center;justify-content:center;gap:0;max-width:600px;margin:0 auto 20px;position:relative;z-index:2}
+/* ─── STEP INDICATORS — Sophie-style white bar ─── */
+.steps-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 28px;position:sticky;top:56px;z-index:90;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.steps-row{display:flex;align-items:center;justify-content:center;gap:0;max-width:600px;margin:0 auto}
 .step-item{display:flex;align-items:center;gap:10px}
-.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);transition:all .3s}
-.step-num.active{border-color:var(--blue);color:#fff;background:rgba(107,138,219,.15)}
-.step-num.done{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)}
-.step-label{color:rgba(255,255,255,.4);font-size:12px;font-weight:600;transition:color .3s}
-.step-label.active{color:rgba(255,255,255,.85)}
+.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid #cbd5e1;color:#94a3b8;transition:all .3s}
+.step-num.active{border-color:var(--blue);color:#fff;background:var(--blue)}
+.step-num.done{border-color:var(--green);color:#fff;background:var(--green)}
+.step-label{color:#94a3b8;font-size:12px;font-weight:600;transition:color .3s}
+.step-label.active{color:var(--navy)}
 .step-label.done{color:var(--green)}
-.step-connector{width:48px;height:2px;background:rgba(255,255,255,.08);margin:0 8px;transition:background .3s}
+.step-connector{width:48px;height:2px;background:#e2e8f0;margin:0 8px;transition:background .3s}
 .step-connector.done{background:var(--green)}
 
 /* ─── FORM CARD — Sophie-style sections ─── */
@@ -158,26 +172,31 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .call-page{background:var(--navy);min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
 /* Floating background orbs — "Idea to Impact" style */
 .call-bg-orb{position:absolute;border-radius:50%;pointer-events:none;z-index:0}
-.call-bg-orb.o1{width:400px;height:400px;top:-100px;left:-120px;background:radial-gradient(circle,rgba(107,138,219,.18) 0%,transparent 70%);filter:blur(80px);animation:float-orb1 12s ease-in-out infinite}
-.call-bg-orb.o2{width:350px;height:350px;bottom:-80px;right:-100px;background:radial-gradient(circle,rgba(155,127,199,.15) 0%,transparent 70%);filter:blur(80px);animation:float-orb2 15s ease-in-out infinite}
-.call-bg-orb.o3{width:250px;height:250px;top:40%;right:10%;background:radial-gradient(circle,rgba(212,132,154,.12) 0%,transparent 70%);filter:blur(60px);animation:float-orb3 10s ease-in-out infinite}
-.call-bg-orb.o4{width:180px;height:180px;bottom:20%;left:8%;background:radial-gradient(circle,rgba(232,158,108,.1) 0%,transparent 70%);filter:blur(50px);animation:float-orb4 14s ease-in-out infinite}
+.call-bg-orb.o1{width:500px;height:500px;top:-100px;left:-120px;background:radial-gradient(circle,rgba(107,138,219,.3) 0%,transparent 70%);filter:blur(80px);animation:float-orb1 12s ease-in-out infinite}
+.call-bg-orb.o2{width:450px;height:450px;bottom:-80px;right:-100px;background:radial-gradient(circle,rgba(155,127,199,.25) 0%,transparent 70%);filter:blur(80px);animation:float-orb2 15s ease-in-out infinite}
+.call-bg-orb.o3{width:350px;height:350px;top:40%;right:10%;background:radial-gradient(circle,rgba(212,132,154,.22) 0%,transparent 70%);filter:blur(60px);animation:float-orb3 10s ease-in-out infinite}
+.call-bg-orb.o4{width:280px;height:280px;bottom:20%;left:8%;background:radial-gradient(circle,rgba(232,158,108,.18) 0%,transparent 70%);filter:blur(50px);animation:float-orb4 14s ease-in-out infinite}
 @keyframes float-orb1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,20px)}}
 @keyframes float-orb2{0%,100%{transform:translate(0,0)}50%{transform:translate(-25px,-15px)}}
 @keyframes float-orb3{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,25px)}}
 @keyframes float-orb4{0%,100%{transform:translate(0,0)}50%{transform:translate(15px,-20px)}}
-/* Geometric shapes — subtle bordered squares, dashed rings, pulsing dots */
+/* Geometric shapes — boosted visibility, more variety */
 .call-geo{position:absolute;pointer-events:none;z-index:0}
-.call-geo.sq1{width:60px;height:60px;border:1px solid rgba(107,138,219,.1);border-radius:8px;top:12%;left:6%;transform:rotate(25deg);animation:geo-drift 20s linear infinite}
-.call-geo.sq2{width:40px;height:40px;border:1px solid rgba(155,127,199,.08);border-radius:6px;bottom:15%;right:5%;transform:rotate(-15deg);animation:geo-drift 25s linear infinite reverse}
-.call-geo.ring1{width:80px;height:80px;border:1.5px dashed rgba(212,132,154,.1);border-radius:50%;top:25%;right:3%;animation:geo-spin 30s linear infinite}
-.call-geo.ring2{width:50px;height:50px;border:1px dashed rgba(107,138,219,.08);border-radius:50%;bottom:30%;left:4%;animation:geo-spin 22s linear infinite reverse}
-.call-geo.dot1{width:6px;height:6px;border-radius:50%;background:rgba(107,138,219,.2);top:20%;left:15%;animation:geo-pulse 3s ease-in-out infinite}
-.call-geo.dot2{width:4px;height:4px;border-radius:50%;background:rgba(155,127,199,.15);bottom:25%;right:12%;animation:geo-pulse 4s ease-in-out infinite .5s}
-.call-geo.dot3{width:5px;height:5px;border-radius:50%;background:rgba(232,158,108,.15);top:60%;left:3%;animation:geo-pulse 3.5s ease-in-out infinite 1s}
+.call-geo.sq1{width:80px;height:80px;border:1.5px solid rgba(107,138,219,.22);border-radius:10px;top:10%;left:5%;transform:rotate(25deg);animation:geo-drift 18s linear infinite}
+.call-geo.sq2{width:55px;height:55px;border:1.5px solid rgba(155,127,199,.18);border-radius:8px;bottom:12%;right:4%;transform:rotate(-15deg);animation:geo-drift 22s linear infinite reverse}
+.call-geo.sq3{width:45px;height:45px;border:1px solid rgba(232,158,108,.15);border-radius:6px;top:65%;left:2%;transform:rotate(40deg);animation:geo-drift 26s linear infinite}
+.call-geo.ring1{width:100px;height:100px;border:2px dashed rgba(212,132,154,.2);border-radius:50%;top:22%;right:2%;animation:geo-spin 25s linear infinite}
+.call-geo.ring2{width:65px;height:65px;border:1.5px dashed rgba(107,138,219,.16);border-radius:50%;bottom:28%;left:3%;animation:geo-spin 20s linear infinite reverse}
+.call-geo.ring3{width:40px;height:40px;border:1px dashed rgba(155,127,199,.14);border-radius:50%;top:8%;right:15%;animation:geo-spin 30s linear infinite}
+.call-geo.dot1{width:8px;height:8px;border-radius:50%;background:rgba(107,138,219,.35);top:18%;left:14%;animation:geo-pulse 3s ease-in-out infinite}
+.call-geo.dot2{width:6px;height:6px;border-radius:50%;background:rgba(155,127,199,.3);bottom:22%;right:10%;animation:geo-pulse 3.5s ease-in-out infinite .5s}
+.call-geo.dot3{width:7px;height:7px;border-radius:50%;background:rgba(232,158,108,.3);top:55%;left:2%;animation:geo-pulse 4s ease-in-out infinite 1s}
+.call-geo.dot4{width:5px;height:5px;border-radius:50%;background:rgba(212,132,154,.25);top:35%;right:8%;animation:geo-pulse 3s ease-in-out infinite 1.5s}
+.call-geo.tri1{width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-bottom:35px solid rgba(107,138,219,.1);top:75%;right:6%;animation:geo-drift 28s linear infinite;filter:blur(1px)}
+.call-geo.tri2{width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-bottom:26px solid rgba(155,127,199,.08);bottom:8%;left:12%;animation:geo-drift 32s linear infinite reverse;filter:blur(1px)}
 @keyframes geo-drift{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @keyframes geo-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-@keyframes geo-pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+@keyframes geo-pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.8)}}
 
 .call-wrap{max-width:1140px;width:100%;padding:32px 28px;display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;flex:1;position:relative;z-index:1}
 .call-left{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
@@ -329,12 +348,16 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 @media(max-width:768px){
   .hero-float-badge{display:none}
   .hero-h1{font-size:36px}
+  .hero-two-col{grid-template-columns:1fr;gap:20px}
+  .hero-col-right{order:-1}
   .michael-img{width:200px;height:200px}
-  .michael-bg{width:240px;height:240px}
+  .michael-bg{width:260px;height:260px}
+  .michael-bg-inner{width:200px;height:200px}
   .michael-ring{width:220px;height:220px}
-  .features-row{grid-template-columns:1fr;padding:0 20px}
+  .features-col{padding:0 10px}
   .steps-row{flex-wrap:wrap;gap:8px}
   .step-connector{width:24px}
+  .scroll-indicator{display:none}
   .fg{grid-template-columns:1fr}
   .tone-grid{grid-template-columns:repeat(3,1fr)}
   .call-wrap{grid-template-columns:1fr;gap:24px}
@@ -788,6 +811,30 @@ function App() {
       </header>
 
       {/* ─── PAGE 1: SETUP ─── */}
+      {/* ─── PERSISTENT STEP BAR — visible on all 3 pages ─── */}
+      <div className="steps-bar">
+        <div className="steps-row">
+          <div className="step-item">
+            <div className={`step-num ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>
+              {currentStepNum > 1 ? '\u2713' : '1'}
+            </div>
+            <span className={`step-label ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>Load Context</span>
+          </div>
+          <div className={`step-connector ${currentStepNum > 1 ? 'done' : ''}`} />
+          <div className="step-item">
+            <div className={`step-num ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>
+              {currentStepNum > 2 ? '\u2713' : '2'}
+            </div>
+            <span className={`step-label ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>Talk to Michael</span>
+          </div>
+          <div className={`step-connector ${currentStepNum > 2 ? 'done' : ''}`} />
+          <div className="step-item">
+            <div className={`step-num ${currentStepNum === 3 ? 'active' : ''}`}>3</div>
+            <span className={`step-label ${currentStepNum === 3 ? 'active' : ''}`}>Debrief</span>
+          </div>
+        </div>
+      </div>
+
       {step === 'setup' && (
         <>
           <section className="hero">
@@ -795,75 +842,65 @@ function App() {
             <div className="hero-content">
                 <div className="hero-badge">AI-Powered Outbound</div>
                 <h1 className="hero-h1">Meet <em>Michael</em>, your AI BDR</h1>
-                <p className="hero-p">
-                  Stop burning pipeline. Michael handles cold calls at scale with human-like conversations, objection handling, and real-time meeting booking. Built for sales leaders who need results.
-                </p>
-                {/* Michael Image with gradient orb glow */}
-                <div className="hero-showcase-wrap">
-                  <div className="hero-float-badge hfb-1"><span className="hfb-dot" /> Meeting booked</div>
-                  <div className="hero-float-badge hfb-2"><span className="hfb-dot" /> Objection handled</div>
-                  <div className="hero-float-badge hfb-3"><span className="hfb-dot" /> Follow-up drafted</div>
-                  <div className={`michael-showcase ${voicePlaying ? 'preview-active' : ''}`}>
-                    <div className="michael-bg" />
-                    <div className="michael-ring" />
-                    <img className="michael-img" src={MICHAEL_IMG} alt="Michael — AI BDR Agent" />
-                  </div>
-                  {/* Voice Preview — below Michael's image */}
-                  <div className={`voice-preview ${voicePlaying ? 'playing' : ''}`} onClick={playVoicePreview} style={{marginTop:12}}>
-                    <div className="voice-preview-orb" />
-                    <div className="voice-preview-inner">
-                      <div className="voice-bars">
-                        <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                        <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                        <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                        <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                        <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+
+                {/* 2-column layout: Michael LEFT | Features RIGHT */}
+                <div className="hero-two-col">
+                  <div className="hero-col-left">
+                    <div className="hero-showcase-wrap">
+                      <div className="hero-float-badge hfb-1"><span className="hfb-dot" /> Meeting booked</div>
+                      <div className="hero-float-badge hfb-2"><span className="hfb-dot" /> Objection handled</div>
+                      <div className="hero-float-badge hfb-3"><span className="hfb-dot" /> Follow-up drafted</div>
+                      <div className={`michael-showcase ${voicePlaying ? 'preview-active' : ''}`}>
+                        <div className="michael-bg" />
+                        <div className="michael-bg-inner" />
+                        <div className="michael-ring" />
+                        <img className="michael-img" src={MICHAEL_IMG} alt="Michael — AI BDR Agent" />
                       </div>
-                      <span className="voice-preview-text">
-                        {voiceLoading ? 'Loading...' : voicePlaying ? 'Playing...' : "Preview Michael's Voice"}
-                      </span>
+                      {/* Voice Preview — below Michael\'s image */}
+                      <div className={`voice-preview ${voicePlaying ? 'playing' : ''}`} onClick={playVoicePreview} style={{marginTop:12}}>
+                        <div className="voice-preview-orb" />
+                        <div className="voice-preview-inner">
+                          <div className="voice-bars">
+                            <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                            <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                            <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                            <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                            <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                          </div>
+                          <span className="voice-preview-text">
+                            {voiceLoading ? 'Loading...' : voicePlaying ? 'Playing...' : "Preview Michael\'s Voice"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hero-col-right">
+                    <div className="features-col">
+                      <div className="feature-box">
+                        <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><defs><linearGradient id="icon-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#6B8ADB"/><stop offset="100%" stopColor="#D4849A"/></linearGradient></defs><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>
+                        <div className="feature-title">Auto-Books Meetings</div>
+                        <div className="feature-desc">Qualifies prospects and books meetings directly on the call. No handoffs, no delays.</div>
+                      </div>
+                      <div className="feature-box">
+                        <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+                        <div className="feature-title">Handles Objections</div>
+                        <div className="feature-desc">Trained on proven sales frameworks. Navigates pushback like a seasoned rep.</div>
+                      </div>
+                      <div className="feature-box">
+                        <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                        <div className="feature-title">Scales Instantly</div>
+                        <div className="feature-desc">100x more outbound without hiring. Works around the clock, never burns out.</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-            </div>
-            {/* Feature Boxes — full width below hero grid */}
-            <div className="features-row" style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto' }}>
-              <div className="feature-box">
-                <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><defs><linearGradient id="icon-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#6B8ADB"/><stop offset="100%" stopColor="#D4849A"/></linearGradient></defs><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>
-                <div className="feature-title">Auto-Books Meetings</div>
-                <div className="feature-desc">Qualifies prospects and books meetings directly on the call. No handoffs, no delays.</div>
-              </div>
-              <div className="feature-box">
-                <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-                <div className="feature-title">Handles Objections</div>
-                <div className="feature-desc">Trained on proven sales frameworks. Navigates pushback like a seasoned rep.</div>
-              </div>
-              <div className="feature-box">
-                <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-                <div className="feature-title">Scales Instantly</div>
-                <div className="feature-desc">100x more outbound without hiring. Works around the clock, never burns out.</div>
-              </div>
-            </div>
-            {/* Step Indicators */}
-            <div className="steps-row">
-              <div className="step-item">
-                <div className={`step-num ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>
-                  {currentStepNum > 1 ? '\u2713' : '1'}
+
+                {/* Scroll indicator */}
+                <div className="scroll-indicator" onClick={() => document.getElementById('form-section')?.scrollIntoView({behavior:'smooth'})}>
+                  <span className="scroll-indicator-text">Configure below</span>
+                  <div className="scroll-indicator-chevron" />
                 </div>
-                <span className={`step-label ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>Load Context</span>
-              </div>
-              <div className={`step-connector ${currentStepNum > 1 ? 'done' : ''}`} />
-              <div className="step-item">
-                <div className={`step-num ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>
-                  {currentStepNum > 2 ? '\u2713' : '2'}
-                </div>
-                <span className={`step-label ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>Talk to Michael</span>
-              </div>
-              <div className={`step-connector ${currentStepNum > 2 ? 'done' : ''}`} />
-              <div className="step-item">
-                <div className={`step-num ${currentStepNum === 3 ? 'active' : ''}`}>3</div>
-                <span className={`step-label ${currentStepNum === 3 ? 'active' : ''}`}>Debrief</span>
-              </div>
             </div>
           </section>
 
@@ -1046,14 +1083,19 @@ function App() {
           <div className="call-bg-orb o2" />
           <div className="call-bg-orb o3" />
           <div className="call-bg-orb o4" />
-          {/* Geometric shapes */}
+          {/* Geometric shapes — boosted */}
           <div className="call-geo sq1" />
           <div className="call-geo sq2" />
+          <div className="call-geo sq3" />
           <div className="call-geo ring1" />
           <div className="call-geo ring2" />
+          <div className="call-geo ring3" />
           <div className="call-geo dot1" />
           <div className="call-geo dot2" />
           <div className="call-geo dot3" />
+          <div className="call-geo dot4" />
+          <div className="call-geo tri1" />
+          <div className="call-geo tri2" />
           <div className="call-wrap">
             <div className="call-left">
               <div className="call-avatar">

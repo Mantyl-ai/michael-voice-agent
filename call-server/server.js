@@ -473,12 +473,12 @@ async function handleMediaStream(ws, sessionId) {
               });
 
               // Gracefully end the call after meeting is booked
-              // Generate a natural closing line, send it, then hang up
-              console.log(`[${sessionId}] Meeting booked! Initiating graceful call ending...`);
+              // Generate a natural closing line mentioning calendar invite, then allow 15-20s grace period
+              console.log(`[${sessionId}] Meeting booked! Starting graceful close (15-20s grace period)...`);
               setTimeout(async () => {
                 try {
-                  // Generate a natural closing response
-                  const closingPrompt = 'The prospect just agreed to a meeting. Say a brief, natural goodbye to wrap up the call. Keep it to 1-2 sentences max. Examples: "Sounds great, I\'ll send over the calendar invite right after this. Really appreciate your time!" or "Perfect, you\'ll get the details in your inbox shortly. Thanks so much for chatting!"';
+                  // Generate a closing response that mentions the calendar invite / email follow-up
+                  const closingPrompt = 'The prospect just confirmed a specific meeting date and time. Say a warm, natural goodbye that: (1) confirms you will send a calendar invite to their email, (2) briefly thanks them for their time, (3) wishes them a great day. Keep it to 2-3 sentences. Sound natural and warm, not robotic.';
                   const closingResponse = await generateResponse(closingPrompt, session.messages);
 
                   if (closingResponse) {
@@ -492,25 +492,29 @@ async function handleMediaStream(ws, sessionId) {
                     }
                   }
 
-                  // Wait for closing audio to play (~4 seconds), then hang up
+                  // Grace period: wait 18 seconds to allow natural conversation wrap-up
+                  // (the prospect might say "bye" or ask a quick follow-up question)
+                  console.log(`[${sessionId}] Closing audio sent. Waiting 18s grace period before hangup...`);
                   setTimeout(async () => {
                     try {
                       if (session.callSid) {
-                        console.log(`[${sessionId}] Hanging up call ${session.callSid} after meeting booked`);
+                        console.log(`[${sessionId}] Grace period over. Hanging up call ${session.callSid}`);
                         await twilioClient.calls(session.callSid).update({ status: 'completed' });
                       }
                     } catch (hangupErr) {
                       console.error(`[${sessionId}] Error hanging up call:`, hangupErr.message);
                     }
-                  }, 5000);
+                  }, 18000); // 18 seconds grace period (was 5s — too abrupt)
                 } catch (closeErr) {
                   console.error(`[${sessionId}] Error in graceful close:`, closeErr.message);
-                  // Still try to hang up even if closing line fails
-                  try {
-                    if (session.callSid) {
-                      await twilioClient.calls(session.callSid).update({ status: 'completed' });
-                    }
-                  } catch (e) {}
+                  // Still try to hang up even if closing line fails, but with delay
+                  setTimeout(async () => {
+                    try {
+                      if (session.callSid) {
+                        await twilioClient.calls(session.callSid).update({ status: 'completed' });
+                      }
+                    } catch (e) {}
+                  }, 15000);
                 }
               }, 2000); // Give 2s for the current response audio to finish
             }
@@ -697,66 +701,66 @@ function broadcastToUI(sessionId, data) {
   }
 }
 
-// ─── Detect if a meeting was booked (requires EXPLICIT time/date confirmation) ───
-// The old heuristic triggered on vague phrases like "sounds good" before a time was confirmed.
-// Now we require: (1) a specific day or time was mentioned, AND (2) the prospect explicitly confirmed it.
+// ─── Detect if a meeting was booked (STRICT — requires explicit date+time confirmation) ───
+// Round 4: User reported premature hangup. Now requires:
+// (1) Michael proposed a SPECIFIC time/date
+// (2) The prospect EXPLICITLY confirmed with scheduling language (not just "yes"/"yeah")
+// (3) Both a day AND time must be present in the conversation
 function detectMeetingBooked(michaelText, userText) {
   const michaelLower = (michaelText || '').toLowerCase();
   const userLower = (userText || '').toLowerCase();
   const combined = `${michaelLower} ${userLower}`;
 
-  // Step 1: A time/date reference MUST be present somewhere in the conversation.
-  // Accept specific times, relative times, day-of-week mentions, etc.
-  const timePatterns = [
+  // Step 1: A SPECIFIC time must be mentioned (not just "morning" or "afternoon")
+  const specificTimePatterns = [
     /\b\d{1,2}\s*(am|pm|a\.m\.|p\.m\.)\b/,
     /\b\d{1,2}:\d{2}\b/,
-    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
-    /\b(tomorrow|next week|next month|this week|this friday)\b/i,
-    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}\b/,
-    /\bin\s+\d+\s+(days?|weeks?|months?)\b/i,
-    /\b(morning|afternoon|evening)\b/i,
-    /\b(end of|beginning of)\s+(the\s+)?(week|month)\b/i,
   ];
-  const hasTimeRef = timePatterns.some(pat => pat.test(combined));
-  if (!hasTimeRef) return false;
+  const hasSpecificTime = specificTimePatterns.some(pat => pat.test(combined));
 
-  // Step 2: The PROSPECT must confirm in some way.
-  // Accept strong scheduling phrases AND simple affirmatives when a time is on the table.
-  const strongConfirmPhrases = [
+  // Step 2: A SPECIFIC day must also be mentioned
+  const specificDayPatterns = [
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
+    /\b(tomorrow)\b/i,
+    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}\b/,
+    /\b(next\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i,
+    /\bthis\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
+  ];
+  const hasSpecificDay = specificDayPatterns.some(pat => pat.test(combined));
+
+  // Must have BOTH a day AND a time (not just one)
+  if (!hasSpecificTime || !hasSpecificDay) return false;
+
+  // Step 3: The PROSPECT must explicitly confirm with scheduling-specific language.
+  // Simple "yes", "yeah", "ok" are NOT sufficient — they might be responding to something else.
+  const confirmPhrases = [
     'that works', 'works for me', 'that time works', 'that day works',
     'let\'s do it', 'book it', 'let\'s book it', 'see you then',
     'looking forward', 'i\'ll be there', 'count me in', 'put me down',
     'lock it in', 'i can do that', 'i\'m available then',
     'sounds good', 'sounds great', 'sounds perfect',
+    'perfect let\'s do', 'yes that works', 'yeah that works',
+    'sure that works', 'ok that works', 'great see you',
   ];
-  const simpleConfirms = [
-    'yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'absolutely',
-    'perfect', 'great', 'definitely', 'for sure', 'of course',
-  ];
-  const dayConfirmPatterns = [
-    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(works|is good|is fine|is perfect)\b/,
-    /\b\d{1,2}\s*(am|pm)\s+(works|is good|is fine|is perfect)\b/,
-    /\byes.*(works|good|perfect|book|schedule)/,
+  const confirmWithTimePatterns = [
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(works|is good|is fine|is perfect)\b/i,
+    /\b\d{1,2}\s*(am|pm)\s+(works|is good|is fine|is perfect)\b/i,
+    /\b(yes|yeah|yep|sure).{0,20}(works|book|schedule|perfect|great|do it|see you)/i,
+    /\b(works|perfect|great).{0,20}(see you|looking forward|i'll be there)/i,
   ];
 
-  const prospectConfirmed = strongConfirmPhrases.some(phrase => userLower.includes(phrase))
-    || simpleConfirms.some(word => {
-      // Match as standalone word (not part of a larger word)
-      const regex = new RegExp(`\\b${word}\\b`);
-      return regex.test(userLower);
-    })
-    || dayConfirmPatterns.some(pat => pat.test(userLower));
+  const prospectConfirmed = confirmPhrases.some(phrase => userLower.includes(phrase))
+    || confirmWithTimePatterns.some(pat => pat.test(userLower));
 
   if (!prospectConfirmed) return false;
 
-  // Step 3: Michael must have proposed or discussed the meeting (scheduling language present)
+  // Step 4: Michael must have proposed the meeting with scheduling language
   const schedulingPhrases = [
     'how about', 'does that work', 'would that work', 'can you do',
     'let me book', 'i\'ll send', 'calendar invite',
     'schedule', 'book a time', 'set up a meeting',
-    'meeting', 'demo', 'call', 'chat', 'catch up',
     'i\'ve got you down', 'pencil you in', 'block off',
-    'does', 'work for you', 'available',
+    'work for you',
   ];
   const michaelProposed = schedulingPhrases.some(phrase => michaelLower.includes(phrase));
 
