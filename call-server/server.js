@@ -340,6 +340,7 @@ async function handleMediaStream(ws, sessionId) {
   let deepgramConnection = null;
   let isProcessingResponse = false;
   let audioQueue = []; // Queue audio until Deepgram is ready
+  let openingCooldown = true; // Suppress responses while Michael's opening line plays
 
   // IMPORTANT: Register the message handler FIRST, before awaiting Deepgram.
   // Twilio sends 'connected' and 'start' events immediately on WebSocket open.
@@ -398,6 +399,12 @@ async function handleMediaStream(ws, sessionId) {
         }
 
         if (!text.trim()) return;
+
+        // Suppress responses during opening cooldown (prevents double intro)
+        if (openingCooldown) {
+          console.log(`[${sessionId}] Ignoring user speech during opening cooldown: "${text}"`);
+          return;
+        }
 
         console.log(`[${sessionId}] User said: "${text}"`);
 
@@ -565,8 +572,17 @@ async function sendOpeningLine(session) {
     }
 
     broadcastToUI(sessionId, { type: 'status', value: 'listening' });
+
+    // Estimate audio duration: mulaw 8kHz = 8000 bytes/sec
+    const estimatedDurationMs = audioBuffer ? Math.ceil((audioBuffer.length / 8000) * 1000) + 1500 : 6000;
+    console.log(`[${sessionId}] Opening cooldown will clear in ${estimatedDurationMs}ms`);
+    setTimeout(() => {
+      openingCooldown = false;
+      console.log(`[${sessionId}] Opening cooldown cleared — now accepting user speech`);
+    }, estimatedDurationMs);
   } catch (err) {
     console.error(`[${sessionId}] Failed to send opening:`, err.message);
+    openingCooldown = false; // Clear cooldown on error so call isn't stuck
   }
 }
 
@@ -674,48 +690,51 @@ function detectMeetingBooked(michaelText, userText) {
   const userLower = (userText || '').toLowerCase();
   const combined = `${michaelLower} ${userLower}`;
 
-  // Step 1: A specific day/time MUST be present in the conversation turn
-  const timePatterns = [
-    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/,
+  // Step 1: A SPECIFIC time MUST be present (day of week alone isn't enough —
+  // need an actual clock time, e.g. "2pm", "10:30", "Tuesday at 3")
+  const specificTimePatterns = [
     /\b\d{1,2}\s*(am|pm|a\.m\.|p\.m\.)\b/,
     /\b\d{1,2}:\d{2}\b/,
-    /\b(morning|afternoon|evening)\b/,
-    /\b(tomorrow|next week)\b/,
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(at|around)\s+\d/i,
+    /\b(tomorrow|next week)\s+(at|around)\s+\d/i,
     /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}\b/,
-    /\b\d{1,2}\/\d{1,2}\b/,
   ];
-  const hasTimeOrDay = timePatterns.some(pat => pat.test(combined));
-  if (!hasTimeOrDay) return false;
+  const hasSpecificTime = specificTimePatterns.some(pat => pat.test(combined));
+  if (!hasSpecificTime) return false;
 
-  // Step 2: The PROSPECT (userText) must explicitly confirm the time/day
-  const confirmPhrases = [
-    'sounds good', 'that works', 'works for me', 'let\'s do it', 'book it',
-    'see you then', 'looking forward', 'confirmed', 'perfect', 'i\'ll be there',
-    'count me in', 'yes', 'yeah', 'yep', 'sure', 'absolutely', 'definitely',
-    'that time works', 'that day works', 'i can do that', 'i\'m available',
-    'let\'s book it', 'put me down', 'lock it in',
+  // Step 2: The PROSPECT must explicitly confirm WITH scheduling intent.
+  // Generic "yes", "sure", "yeah" alone are NOT enough — they could be responding to anything.
+  // Require either a time-aware confirmation or a strong scheduling phrase.
+  const strongConfirmPhrases = [
+    'that works', 'works for me', 'that time works', 'that day works',
+    'let\'s do it', 'book it', 'let\'s book it', 'see you then',
+    'looking forward', 'i\'ll be there', 'count me in', 'put me down',
+    'lock it in', 'i can do that', 'i\'m available then',
   ];
-  // Also check for "[day] works" pattern from the prospect
   const dayConfirmPatterns = [
-    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+works\b/,
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(works|is good|is fine|is perfect)\b/,
     /\b\d{1,2}\s*(am|pm)\s+(works|is good|is fine|is perfect)\b/,
+    /\byes.*(works|good|perfect|book|schedule)/,
+    /\b(sounds good|sounds great|sounds perfect)\b/,
   ];
 
-  const prospectConfirmed = confirmPhrases.some(phrase => userLower.includes(phrase))
+  const prospectConfirmed = strongConfirmPhrases.some(phrase => userLower.includes(phrase))
     || dayConfirmPatterns.some(pat => pat.test(userLower));
 
   if (!prospectConfirmed) return false;
 
-  // Step 3: Michael should have proposed the meeting (mentioned scheduling language)
+  // Step 3: Michael must have proposed the meeting (scheduling language present)
   const schedulingPhrases = [
     'how about', 'does that work', 'would that work', 'can you do',
-    'i have', 'i\'ve got', 'let me book', 'i\'ll send', 'calendar invite',
-    'schedule', 'book a time', 'set up a meeting', 'quick call',
-    'does .* work for you', 'how does .* sound',
+    'let me book', 'i\'ll send', 'calendar invite',
+    'schedule', 'book a time', 'set up a meeting',
   ];
   const michaelProposed = schedulingPhrases.some(phrase => michaelLower.includes(phrase));
 
-  return michaelProposed;
+  if (!michaelProposed) return false;
+
+  console.log(`[detectMeetingBooked] TRIGGERED — Michael: "${michaelText}", User: "${userText}"`);
+  return true;
 }
 
 // ─── Start Server ───

@@ -14,6 +14,12 @@
   to = "/.netlify/functions/debrief"
   status = 200
 
+# Post-call summary email via n8n
+[[redirects]]
+  from = "/api/send-summary-email"
+  to = "/.netlify/functions/send-summary-email"
+  status = 200
+
 # Voice preview proxy — direct to Railway (no auth needed)
 [[redirects]]
   from = "/api/voice-preview"
