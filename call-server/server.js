@@ -403,6 +403,48 @@ async function handleMediaStream(ws, sessionId) {
                 type: 'meeting_booked',
                 message: 'Michael has booked a meeting!',
               });
+
+              // Gracefully end the call after meeting is booked
+              // Generate a natural closing line, send it, then hang up
+              console.log(`[${sessionId}] Meeting booked! Initiating graceful call ending...`);
+              setTimeout(async () => {
+                try {
+                  // Generate a natural closing response
+                  const closingPrompt = 'The prospect just agreed to a meeting. Say a brief, natural goodbye to wrap up the call. Keep it to 1-2 sentences max. Examples: "Sounds great, I\'ll send over the calendar invite right after this. Really appreciate your time!" or "Perfect, you\'ll get the details in your inbox shortly. Thanks so much for chatting!"';
+                  const closingResponse = await generateResponse(closingPrompt, session.messages);
+
+                  if (closingResponse) {
+                    session.addMessage('assistant', closingResponse);
+                    broadcastToUI(sessionId, { type: 'michael_speech', text: closingResponse });
+                    broadcastToUI(sessionId, { type: 'status', value: 'speaking' });
+
+                    const closingAudio = await synthesizeSpeech(closingResponse);
+                    if (closingAudio && session.mediaWs && session.streamSid) {
+                      await sendAudioToTwilio(session.mediaWs, session.streamSid, closingAudio, sessionId);
+                    }
+                  }
+
+                  // Wait for closing audio to play (~4 seconds), then hang up
+                  setTimeout(async () => {
+                    try {
+                      if (session.callSid) {
+                        console.log(`[${sessionId}] Hanging up call ${session.callSid} after meeting booked`);
+                        await twilioClient.calls(session.callSid).update({ status: 'completed' });
+                      }
+                    } catch (hangupErr) {
+                      console.error(`[${sessionId}] Error hanging up call:`, hangupErr.message);
+                    }
+                  }, 5000);
+                } catch (closeErr) {
+                  console.error(`[${sessionId}] Error in graceful close:`, closeErr.message);
+                  // Still try to hang up even if closing line fails
+                  try {
+                    if (session.callSid) {
+                      await twilioClient.calls(session.callSid).update({ status: 'completed' });
+                    }
+                  } catch (e) {}
+                }
+              }, 2000); // Give 2s for the current response audio to finish
             }
           } catch (err) {
             console.error(`[${sessionId}] Response generation error:`, err.message);
