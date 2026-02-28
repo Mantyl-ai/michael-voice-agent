@@ -11,6 +11,7 @@
  */
 
 const ALLOWED_ORIGINS = [
+  'https://michael-voice-agent.netlify.app',
   'https://michael.mantyl.ai',
   'https://tools.mantyl.ai',
   'http://localhost:8888',

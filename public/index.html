@@ -274,13 +274,23 @@ function App() {
     if (errors[key]) setErrors(e => ({ ...e, [key]: null }));
   };
 
+  // Normalize phone to E.164 format (+1XXXXXXXXXX)
+  const normalizePhone = (raw) => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length === 10) return `+1${digits}`;       // US number without country code
+    if (digits.length === 11 && digits[0] === '1') return `+${digits}`; // US with leading 1
+    if (raw.trim().startsWith('+')) return `+${digits}`;   // International
+    return `+${digits}`;
+  };
+
   // Validate form
   const validate = () => {
     const e = {};
     if (!form.firstName.trim()) e.firstName = 'Required';
     if (!form.lastName.trim()) e.lastName = 'Required';
     if (!form.email.trim() || !form.email.includes('@')) e.email = 'Valid email required';
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 10) e.phone = 'Valid phone number required';
+    const phoneDigits = form.phone.replace(/\D/g, '');
+    if (!form.phone.trim() || phoneDigits.length < 10) e.phone = 'Valid phone number required (e.g. +1 555 123 4567)';
     if (!form.company.trim()) e.company = 'Required';
     if (!form.selling.trim()) e.selling = 'Tell Michael what to sell';
     setErrors(e);
@@ -359,10 +369,11 @@ function App() {
     setLoading(true);
 
     try {
+      const payload = { ...form, phone: normalizePhone(form.phone) };
       const res = await fetch('/api/initiate-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();

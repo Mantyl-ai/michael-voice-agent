@@ -31,7 +31,7 @@ const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const CALL_SERVER_SECRET = process.env.CALL_SERVER_SECRET;
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:8888,http://localhost:3000').split(',');
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://michael-voice-agent.netlify.app,https://michael.mantyl.ai,http://localhost:8888,http://localhost:3000').split(',');
 
 const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
@@ -103,6 +103,10 @@ app.post('/call/initiate', async (req, res) => {
       ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
       : process.env.SERVER_URL || `http://localhost:${PORT}`;
 
+    console.log(`[${sessionId}] Server URL for webhooks: ${serverUrl}`);
+    console.log(`[${sessionId}] Calling ${phone} from ${TWILIO_PHONE_NUMBER}`);
+    console.log(`[${sessionId}] Webhook URL: ${serverUrl}/call/webhook/${sessionId}`);
+
     // Initiate outbound call via Twilio
     const call = await twilioClient.calls.create({
       to: phone,
@@ -118,7 +122,7 @@ app.post('/call/initiate', async (req, res) => {
     session.callSid = call.sid;
     session.status = 'initiating';
 
-    console.log(`[${sessionId}] Call initiated: ${call.sid} → ${phone}`);
+    console.log(`[${sessionId}] Call initiated: ${call.sid} → ${phone} (status: ${call.status})`);
 
     res.json({
       sessionId,
@@ -127,6 +131,7 @@ app.post('/call/initiate', async (req, res) => {
     });
   } catch (err) {
     console.error(`[${sessionId}] Failed to initiate call:`, err.message);
+    console.error(`[${sessionId}] Full error:`, JSON.stringify(err, null, 2));
     sessions.delete(sessionId);
     res.status(500).json({ error: `Failed to initiate call: ${err.message}` });
   }

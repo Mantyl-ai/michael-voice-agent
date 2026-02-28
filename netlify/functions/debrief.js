@@ -11,6 +11,7 @@
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
 const ALLOWED_ORIGINS = [
+  'https://michael-voice-agent.netlify.app',
   'https://michael.mantyl.ai',
   'https://tools.mantyl.ai',
   'http://localhost:8888',
