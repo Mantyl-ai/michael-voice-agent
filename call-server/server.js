@@ -41,7 +41,12 @@ const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const CALL_SERVER_SECRET = process.env.CALL_SERVER_SECRET;
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://michael-voice-agent.netlify.app,https://michael.mantyl.ai,http://localhost:8888,http://localhost:3000').split(',');
+// Always include the Netlify URL even if env var doesn't have it
+const ALWAYS_ALLOWED = ['https://michael-voice-agent.netlify.app', 'https://michael.mantyl.ai', 'https://tools.mantyl.ai'];
+const ALLOWED_ORIGINS = [...new Set([
+  ...ALWAYS_ALLOWED,
+  ...(process.env.ALLOWED_ORIGINS || 'http://localhost:8888,http://localhost:3000').split(','),
+])].map(o => o.trim()).filter(Boolean);
 
 let twilioClient;
 try {
