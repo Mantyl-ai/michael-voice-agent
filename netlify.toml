@@ -14,6 +14,13 @@
   to = "/.netlify/functions/debrief"
   status = 200
 
+# Voice preview proxy — direct to Railway (no auth needed)
+[[redirects]]
+  from = "/api/voice-preview"
+  to = "https://michael-voice-agent-production.up.railway.app/voice/preview"
+  status = 200
+  force = true
+
 # SPA fallback — force=false so real files (images, etc.) are served directly
 [[redirects]]
   from = "/*"

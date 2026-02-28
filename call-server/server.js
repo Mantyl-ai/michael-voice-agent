@@ -86,6 +86,52 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', uptime: process.uptime() });
 });
 
+// ─── GET /voice/preview — Generate a voice sample from ElevenLabs ───
+app.get('/voice/preview', async (req, res) => {
+  const samples = [
+    "Hey there! Ready to help you book more meetings. Just fill out the form below and let's get started.",
+    "Hi! I'm Michael, your AI BDR. Fill out the form and I'll show you what an AI cold call sounds like.",
+    "Hey! Let me show you how AI can handle cold calls. Drop your details in the form and let's go.",
+    "What's up! I'm here to help your sales team crush it. Fill in the form and I'll give you a live demo.",
+    "Hi there! Want to see AI cold calling in action? Just fill out the form below and I'll call you.",
+  ];
+
+  try {
+    const index = parseInt(req.query.index) || Math.floor(Math.random() * samples.length);
+    const text = samples[index % samples.length];
+
+    const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${process.env.ELEVENLABS_VOICE_ID || 'pdoiqZrWfcY60KV2vt2G'}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': process.env.ELEVENLABS_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'audio/mpeg',
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_turbo_v2',
+        voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+      }),
+    });
+
+    if (!ttsRes.ok) {
+      console.error(`[VoicePreview] ElevenLabs error: ${ttsRes.status}`);
+      return res.status(502).json({ error: 'TTS generation failed' });
+    }
+
+    const audioBuffer = Buffer.from(await ttsRes.arrayBuffer());
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': audioBuffer.length,
+      'Cache-Control': 'public, max-age=3600',
+    });
+    res.send(audioBuffer);
+  } catch (err) {
+    console.error(`[VoicePreview] Error:`, err.message);
+    res.status(500).json({ error: 'Voice preview failed' });
+  }
+});
+
 // ─── POST /call/initiate — Start a call ───
 app.post('/call/initiate', async (req, res) => {
   // Verify shared secret
@@ -620,16 +666,56 @@ function broadcastToUI(sessionId, data) {
   }
 }
 
-// ─── Detect if a meeting was booked (simple heuristic) ───
+// ─── Detect if a meeting was booked (requires EXPLICIT time/date confirmation) ───
+// The old heuristic triggered on vague phrases like "sounds good" before a time was confirmed.
+// Now we require: (1) a specific day or time was mentioned, AND (2) the prospect explicitly confirmed it.
 function detectMeetingBooked(michaelText, userText) {
-  const combined = `${michaelText} ${userText}`.toLowerCase();
-  const meetingPhrases = [
-    'sounds good', 'that works', 'let\'s do it', 'book it',
-    'see you then', 'looking forward', 'confirmed', 'perfect',
-    'tuesday works', 'wednesday works', 'thursday works', 'friday works',
-    'monday works', 'that time works', 'i\'ll be there', 'count me in',
+  const michaelLower = (michaelText || '').toLowerCase();
+  const userLower = (userText || '').toLowerCase();
+  const combined = `${michaelLower} ${userLower}`;
+
+  // Step 1: A specific day/time MUST be present in the conversation turn
+  const timePatterns = [
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/,
+    /\b\d{1,2}\s*(am|pm|a\.m\.|p\.m\.)\b/,
+    /\b\d{1,2}:\d{2}\b/,
+    /\b(morning|afternoon|evening)\b/,
+    /\b(tomorrow|next week)\b/,
+    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}\b/,
+    /\b\d{1,2}\/\d{1,2}\b/,
   ];
-  return meetingPhrases.some(phrase => combined.includes(phrase));
+  const hasTimeOrDay = timePatterns.some(pat => pat.test(combined));
+  if (!hasTimeOrDay) return false;
+
+  // Step 2: The PROSPECT (userText) must explicitly confirm the time/day
+  const confirmPhrases = [
+    'sounds good', 'that works', 'works for me', 'let\'s do it', 'book it',
+    'see you then', 'looking forward', 'confirmed', 'perfect', 'i\'ll be there',
+    'count me in', 'yes', 'yeah', 'yep', 'sure', 'absolutely', 'definitely',
+    'that time works', 'that day works', 'i can do that', 'i\'m available',
+    'let\'s book it', 'put me down', 'lock it in',
+  ];
+  // Also check for "[day] works" pattern from the prospect
+  const dayConfirmPatterns = [
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+works\b/,
+    /\b\d{1,2}\s*(am|pm)\s+(works|is good|is fine|is perfect)\b/,
+  ];
+
+  const prospectConfirmed = confirmPhrases.some(phrase => userLower.includes(phrase))
+    || dayConfirmPatterns.some(pat => pat.test(userLower));
+
+  if (!prospectConfirmed) return false;
+
+  // Step 3: Michael should have proposed the meeting (mentioned scheduling language)
+  const schedulingPhrases = [
+    'how about', 'does that work', 'would that work', 'can you do',
+    'i have', 'i\'ve got', 'let me book', 'i\'ll send', 'calendar invite',
+    'schedule', 'book a time', 'set up a meeting', 'quick call',
+    'does .* work for you', 'how does .* sound',
+  ];
+  const michaelProposed = schedulingPhrases.some(phrase => michaelLower.includes(phrase));
+
+  return michaelProposed;
 }
 
 // ─── Start Server ───

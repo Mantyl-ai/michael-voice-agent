@@ -36,8 +36,8 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .hdr-book{padding:6px 16px;background:var(--grad);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .15s}
 .hdr-book:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,138,219,.3)}
 
-/* ─── HERO (centered, grid bg like Sophie) ─── */
-.hero{background:var(--navy);position:relative;overflow:hidden;padding:60px 28px 40px;text-align:center}
+/* ─── HERO (centered, grid bg — CONDENSED) ─── */
+.hero{background:var(--navy);position:relative;overflow:hidden;padding:28px 28px 16px;text-align:center}
 .hero-grid{position:absolute;inset:0;background-image:
   linear-gradient(rgba(107,138,219,.06) 1px,transparent 1px),
   linear-gradient(90deg,rgba(107,138,219,.06) 1px,transparent 1px);
@@ -46,45 +46,47 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
   radial-gradient(ellipse 60% 50% at 50% 40%,rgba(107,138,219,.2) 0%,transparent 60%),
   radial-gradient(ellipse 40% 60% at 50% 80%,rgba(155,127,199,.12) 0%,transparent 55%);pointer-events:none;z-index:1}
 .hero-content{position:relative;z-index:2;max-width:680px;margin:0 auto}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(107,138,219,.1);border:1px solid rgba(107,138,219,.2);border-radius:20px;font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:24px}
-.hero-h1{font-size:52px;font-weight:900;color:#fff;line-height:1.08;letter-spacing:-1.5px;margin-bottom:16px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(107,138,219,.1);border:1px solid rgba(107,138,219,.2);border-radius:20px;font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.hero-h1{font-size:44px;font-weight:900;color:#fff;line-height:1.08;letter-spacing:-1.5px;margin-bottom:10px}
 .hero-h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-p{font-size:17px;color:#94a3b8;line-height:1.7;max-width:520px;margin:0 auto 32px}
+.hero-p{font-size:15px;color:#94a3b8;line-height:1.6;max-width:520px;margin:0 auto 16px}
 
 /* Voice preview button */
-.voice-preview{position:relative;display:inline-flex;align-items:center;gap:12px;padding:14px 28px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;cursor:pointer;transition:all .3s;margin-bottom:40px}
+.voice-preview{position:relative;display:inline-flex;align-items:center;gap:12px;padding:12px 24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;cursor:pointer;transition:all .3s;margin-bottom:18px}
 .voice-preview:hover{background:rgba(255,255,255,.08);border-color:rgba(107,138,219,.3);transform:translateY(-2px)}
+.voice-preview.playing{background:rgba(107,138,219,.12);border-color:rgba(107,138,219,.35)}
 .voice-preview-orb{position:absolute;inset:-2px;border-radius:18px;background:var(--grad);opacity:0;filter:blur(12px);transition:opacity .3s;z-index:0}
-.voice-preview:hover .voice-preview-orb{opacity:.3}
+.voice-preview:hover .voice-preview-orb,.voice-preview.playing .voice-preview-orb{opacity:.3}
 .voice-preview-inner{position:relative;z-index:1;display:flex;align-items:center;gap:12px}
 .voice-bars{display:flex;align-items:center;gap:3px;height:24px}
 .voice-bar{width:3px;background:var(--grad);border-radius:2px;animation:voice-wave 1.2s ease-in-out infinite}
-.voice-bar:nth-child(1){height:8px;animation-delay:0s}
-.voice-bar:nth-child(2){height:16px;animation-delay:.15s}
-.voice-bar:nth-child(3){height:24px;animation-delay:.3s}
-.voice-bar:nth-child(4){height:12px;animation-delay:.45s}
-.voice-bar:nth-child(5){height:20px;animation-delay:.6s}
-@keyframes voice-wave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
-.voice-preview-text{color:rgba(255,255,255,.8);font-size:14px;font-weight:600}
+.voice-bar.paused{animation-play-state:paused;transform:scaleY(.3)}
+.voice-bar:nth-child(1){height:6px;animation-delay:0s}
+.voice-bar:nth-child(2){height:14px;animation-delay:.15s}
+.voice-bar:nth-child(3){height:20px;animation-delay:.3s}
+.voice-bar:nth-child(4){height:10px;animation-delay:.45s}
+.voice-bar:nth-child(5){height:16px;animation-delay:.6s}
+@keyframes voice-wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.voice-preview-text{color:rgba(255,255,255,.8);font-size:13px;font-weight:600}
 
 /* Michael showcase (centered, Sophie proportions) */
-.michael-showcase{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:48px}
-.michael-bg{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(107,138,219,.35) 0%,rgba(155,127,199,.3) 25%,rgba(212,132,154,.25) 50%,transparent 100%);filter:blur(40px);animation:glow-breathe 6s ease-in-out infinite}
-.michael-ring{position:absolute;width:260px;height:260px;border-radius:50%;border:1.5px solid rgba(107,138,219,.12);animation:ring-pulse 4s ease-in-out infinite}
+.michael-showcase{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.michael-bg{position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(107,138,219,.35) 0%,rgba(155,127,199,.3) 25%,rgba(212,132,154,.25) 50%,transparent 100%);filter:blur(40px);animation:glow-breathe 6s ease-in-out infinite}
+.michael-ring{position:absolute;width:210px;height:210px;border-radius:50%;border:1.5px solid rgba(107,138,219,.12);animation:ring-pulse 4s ease-in-out infinite}
 @keyframes ring-pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
 @keyframes glow-breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.08);opacity:1}}
-.michael-img{position:relative;z-index:2;width:240px;height:240px;object-fit:cover;object-position:top center;border-radius:50%;filter:drop-shadow(0 16px 48px rgba(0,0,0,.4));border:3px solid rgba(255,255,255,.08)}
+.michael-img{position:relative;z-index:2;width:190px;height:190px;object-fit:cover;object-position:top center;border-radius:50%;filter:drop-shadow(0 12px 36px rgba(0,0,0,.4));border:3px solid rgba(255,255,255,.08)}
 
 /* ─── FLOATING FEATURE BOXES ─── */
-.features-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;max-width:900px;margin:0 auto 48px;position:relative;z-index:2}
-.feature-box{background:rgba(255,255,255,.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px 24px;flex:1;min-width:200px;max-width:280px;text-align:left;transition:all .3s}
+.features-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:900px;margin:0 auto 20px;position:relative;z-index:2}
+.feature-box{background:rgba(255,255,255,.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;flex:1;min-width:200px;max-width:280px;text-align:left;transition:all .3s}
 .feature-box:hover{background:rgba(255,255,255,.08);border-color:rgba(107,138,219,.25);transform:translateY(-4px)}
-.feature-icon{font-size:24px;margin-bottom:10px}
-.feature-title{color:#fff;font-size:14px;font-weight:700;margin-bottom:4px}
-.feature-desc{color:#94a3b8;font-size:12px;line-height:1.5}
+.feature-icon{font-size:20px;margin-bottom:6px}
+.feature-title{color:#fff;font-size:13px;font-weight:700;margin-bottom:3px}
+.feature-desc{color:#94a3b8;font-size:11px;line-height:1.5}
 
 /* ─── STEP INDICATORS ─── */
-.steps-row{display:flex;align-items:center;justify-content:center;gap:0;max-width:600px;margin:0 auto 40px;position:relative;z-index:2}
+.steps-row{display:flex;align-items:center;justify-content:center;gap:0;max-width:600px;margin:0 auto 20px;position:relative;z-index:2}
 .step-item{display:flex;align-items:center;gap:10px}
 .step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);transition:all .3s}
 .step-num.active{border-color:var(--blue);color:#fff;background:rgba(107,138,219,.15)}
@@ -125,22 +127,45 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .section{padding:48px 28px;max-width:1000px;margin:0 auto;width:100%}
 
 /* ─── PAGE 2: LIVE CALL ─── */
-.call-page{background:var(--navy);min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center}
-.call-wrap{max-width:1140px;width:100%;padding:32px 28px;display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;flex:1}
+.call-page{background:var(--navy);min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
+/* Floating background orbs — "Idea to Impact" style */
+.call-bg-orb{position:absolute;border-radius:50%;pointer-events:none;z-index:0}
+.call-bg-orb.o1{width:400px;height:400px;top:-100px;left:-120px;background:radial-gradient(circle,rgba(107,138,219,.18) 0%,transparent 70%);filter:blur(80px);animation:float-orb1 12s ease-in-out infinite}
+.call-bg-orb.o2{width:350px;height:350px;bottom:-80px;right:-100px;background:radial-gradient(circle,rgba(155,127,199,.15) 0%,transparent 70%);filter:blur(80px);animation:float-orb2 15s ease-in-out infinite}
+.call-bg-orb.o3{width:250px;height:250px;top:40%;right:10%;background:radial-gradient(circle,rgba(212,132,154,.12) 0%,transparent 70%);filter:blur(60px);animation:float-orb3 10s ease-in-out infinite}
+.call-bg-orb.o4{width:180px;height:180px;bottom:20%;left:8%;background:radial-gradient(circle,rgba(232,158,108,.1) 0%,transparent 70%);filter:blur(50px);animation:float-orb4 14s ease-in-out infinite}
+@keyframes float-orb1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,20px)}}
+@keyframes float-orb2{0%,100%{transform:translate(0,0)}50%{transform:translate(-25px,-15px)}}
+@keyframes float-orb3{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,25px)}}
+@keyframes float-orb4{0%,100%{transform:translate(0,0)}50%{transform:translate(15px,-20px)}}
+/* Geometric shapes — subtle bordered squares, dashed rings, pulsing dots */
+.call-geo{position:absolute;pointer-events:none;z-index:0}
+.call-geo.sq1{width:60px;height:60px;border:1px solid rgba(107,138,219,.1);border-radius:8px;top:12%;left:6%;transform:rotate(25deg);animation:geo-drift 20s linear infinite}
+.call-geo.sq2{width:40px;height:40px;border:1px solid rgba(155,127,199,.08);border-radius:6px;bottom:15%;right:5%;transform:rotate(-15deg);animation:geo-drift 25s linear infinite reverse}
+.call-geo.ring1{width:80px;height:80px;border:1.5px dashed rgba(212,132,154,.1);border-radius:50%;top:25%;right:3%;animation:geo-spin 30s linear infinite}
+.call-geo.ring2{width:50px;height:50px;border:1px dashed rgba(107,138,219,.08);border-radius:50%;bottom:30%;left:4%;animation:geo-spin 22s linear infinite reverse}
+.call-geo.dot1{width:6px;height:6px;border-radius:50%;background:rgba(107,138,219,.2);top:20%;left:15%;animation:geo-pulse 3s ease-in-out infinite}
+.call-geo.dot2{width:4px;height:4px;border-radius:50%;background:rgba(155,127,199,.15);bottom:25%;right:12%;animation:geo-pulse 4s ease-in-out infinite .5s}
+.call-geo.dot3{width:5px;height:5px;border-radius:50%;background:rgba(232,158,108,.15);top:60%;left:3%;animation:geo-pulse 3.5s ease-in-out infinite 1s}
+@keyframes geo-drift{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes geo-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes geo-pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+
+.call-wrap{max-width:1140px;width:100%;padding:32px 28px;display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;flex:1;position:relative;z-index:1}
 .call-left{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
 .call-avatar{position:relative}
 .call-avatar img{width:280px;height:auto;border-radius:20px;filter:drop-shadow(0 16px 48px rgba(0,0,0,.5))}
 
-/* Animated orb behind avatar during call */
-.call-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:320px;height:320px;border-radius:50%;filter:blur(40px);opacity:.6;z-index:0;transition:all .5s ease}
-.call-orb.listening{background:conic-gradient(from 0deg,rgba(107,138,219,.5),rgba(155,127,199,.4),rgba(107,138,219,.5));animation:orb-listen 3s ease-in-out infinite}
-.call-orb.speaking{background:conic-gradient(from 0deg,rgba(107,138,219,.7),rgba(155,127,199,.6),rgba(212,132,154,.6),rgba(232,158,108,.5),rgba(107,138,219,.7));animation:orb-speak 1.5s ease-in-out infinite}
-.call-orb.thinking{background:radial-gradient(circle,rgba(155,127,199,.6),rgba(107,138,219,.3));animation:orb-think 1s ease-in-out infinite}
-.call-orb.ringing{background:radial-gradient(circle,rgba(34,197,94,.4),rgba(107,138,219,.3));animation:orb-ring 0.8s ease-in-out infinite}
-@keyframes orb-listen{0%,100%{transform:translate(-50%,-50%) scale(1);border-radius:50%}50%{transform:translate(-50%,-50%) scale(1.05);border-radius:48% 52% 50% 50%}}
-@keyframes orb-speak{0%,100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);border-radius:50%}25%{transform:translate(-50%,-50%) scale(1.12) rotate(30deg);border-radius:46% 54% 50% 50%}50%{transform:translate(-50%,-50%) scale(.95) rotate(60deg);border-radius:54% 46% 48% 52%}75%{transform:translate(-50%,-50%) scale(1.08) rotate(90deg);border-radius:48% 52% 54% 46%}}
-@keyframes orb-think{0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(1)}50%{opacity:.7;transform:translate(-50%,-50%) scale(1.06)}}
-@keyframes orb-ring{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.1)}}
+/* Animated orb behind avatar during call — MORE PRONOUNCED */
+.call-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:380px;height:380px;border-radius:50%;filter:blur(50px);opacity:.85;z-index:0;transition:all .5s ease}
+.call-orb.listening{background:conic-gradient(from 0deg,rgba(107,138,219,.6),rgba(155,127,199,.5),rgba(107,138,219,.6));animation:orb-listen 3s ease-in-out infinite}
+.call-orb.speaking{background:conic-gradient(from 0deg,rgba(107,138,219,.8),rgba(155,127,199,.7),rgba(212,132,154,.7),rgba(232,158,108,.6),rgba(107,138,219,.8));animation:orb-speak 1.5s ease-in-out infinite}
+.call-orb.thinking{background:radial-gradient(circle,rgba(155,127,199,.7),rgba(107,138,219,.4));animation:orb-think 1s ease-in-out infinite}
+.call-orb.ringing{background:radial-gradient(circle,rgba(34,197,94,.5),rgba(107,138,219,.4));animation:orb-ring 0.8s ease-in-out infinite}
+@keyframes orb-listen{0%,100%{transform:translate(-50%,-50%) scale(1);border-radius:50%}50%{transform:translate(-50%,-50%) scale(1.08);border-radius:46% 54% 50% 50%}}
+@keyframes orb-speak{0%,100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);border-radius:50%}25%{transform:translate(-50%,-50%) scale(1.15) rotate(30deg);border-radius:44% 56% 50% 50%}50%{transform:translate(-50%,-50%) scale(.92) rotate(60deg);border-radius:56% 44% 46% 54%}75%{transform:translate(-50%,-50%) scale(1.1) rotate(90deg);border-radius:46% 54% 56% 44%}}
+@keyframes orb-think{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.08)}}
+@keyframes orb-ring{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
 
 .call-status{text-align:center}
 .call-status-text{color:#fff;font-size:18px;font-weight:700;margin-bottom:6px}
@@ -308,10 +333,14 @@ function App() {
   const [debriefTab, setDebriefTab] = useState('summary');
   const [debriefLoading, setDebriefLoading] = useState(false);
   const [meetingBooked, setMeetingBooked] = useState(false);
+  const [voicePlaying, setVoicePlaying] = useState(false);
+  const [voiceLoading, setVoiceLoading] = useState(false);
 
   const wsRef = useRef(null);
   const timerRef = useRef(null);
   const scrollRef = useRef(null);
+  const voiceAudioRef = useRef(null);
+  const voiceIndexRef = useRef(0);
 
   // Auto-scroll transcript
   useEffect(() => {
@@ -602,6 +631,41 @@ function App() {
     }
   };
 
+  // ─── Voice Preview: fetch from Railway ElevenLabs endpoint, cycle through 5 samples ───
+  const playVoicePreview = async () => {
+    // If already playing, stop it
+    if (voicePlaying && voiceAudioRef.current) {
+      voiceAudioRef.current.pause();
+      voiceAudioRef.current.currentTime = 0;
+      setVoicePlaying(false);
+      return;
+    }
+    setVoiceLoading(true);
+    try {
+      const idx = voiceIndexRef.current;
+      voiceIndexRef.current = (idx + 1) % 5;
+      const res = await fetch(`/api/voice-preview?index=${idx}`);
+      if (!res.ok) throw new Error('Voice preview failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (voiceAudioRef.current) {
+        voiceAudioRef.current.pause();
+        URL.revokeObjectURL(voiceAudioRef.current.src);
+      }
+      const audio = new Audio(url);
+      voiceAudioRef.current = audio;
+      audio.onended = () => { setVoicePlaying(false); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setVoicePlaying(false); };
+      setVoicePlaying(true);
+      setVoiceLoading(false);
+      await audio.play();
+    } catch (err) {
+      console.error('Voice preview error:', err);
+      setVoicePlaying(false);
+      setVoiceLoading(false);
+    }
+  };
+
   // Current step for indicator
   const currentStepNum = step === 'setup' ? 1 : step === 'call' ? 2 : 3;
 
@@ -633,18 +697,20 @@ function App() {
                 Stop burning pipeline. Michael handles cold calls at scale with human-like conversations, objection handling, and real-time meeting booking. Built for sales leaders who need results.
               </p>
 
-              {/* Voice Preview */}
-              <div className="voice-preview">
+              {/* Voice Preview — click to play ElevenLabs sample */}
+              <div className={`voice-preview ${voicePlaying ? 'playing' : ''}`} onClick={playVoicePreview}>
                 <div className="voice-preview-orb" />
                 <div className="voice-preview-inner">
                   <div className="voice-bars">
-                    <div className="voice-bar" />
-                    <div className="voice-bar" />
-                    <div className="voice-bar" />
-                    <div className="voice-bar" />
-                    <div className="voice-bar" />
+                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
                   </div>
-                  <span className="voice-preview-text">Preview Michael&#39;s Voice</span>
+                  <span className="voice-preview-text">
+                    {voiceLoading ? 'Loading...' : voicePlaying ? 'Playing...' : "Preview Michael's Voice"}
+                  </span>
                 </div>
               </div>
 
@@ -812,6 +878,19 @@ function App() {
       {/* ─── PAGE 2: LIVE CALL ─── */}
       {step === 'call' && (
         <div className="call-page">
+          {/* Floating background orbs — Mantyl "Idea to Impact" style */}
+          <div className="call-bg-orb o1" />
+          <div className="call-bg-orb o2" />
+          <div className="call-bg-orb o3" />
+          <div className="call-bg-orb o4" />
+          {/* Geometric shapes */}
+          <div className="call-geo sq1" />
+          <div className="call-geo sq2" />
+          <div className="call-geo ring1" />
+          <div className="call-geo ring2" />
+          <div className="call-geo dot1" />
+          <div className="call-geo dot2" />
+          <div className="call-geo dot3" />
           <div className="call-wrap">
             <div className="call-left">
               <div className="call-avatar">
