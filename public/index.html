@@ -274,7 +274,27 @@ function App() {
     if (errors[key]) setErrors(e => ({ ...e, [key]: null }));
   };
 
-  // Normalize phone to E.164 format (+1XXXXXXXXXX)
+  // Format phone for display: +1 (XXX) XXX-XXXX
+  const formatPhoneDisplay = (raw) => {
+    const digits = raw.replace(/\D/g, '');
+    // Strip leading 1 for US formatting
+    const usDigits = digits.length === 11 && digits[0] === '1' ? digits.slice(1) : digits;
+    if (usDigits.length === 0) return '';
+    if (usDigits.length <= 3) return `+1 (${usDigits}`;
+    if (usDigits.length <= 6) return `+1 (${usDigits.slice(0,3)}) ${usDigits.slice(3)}`;
+    return `+1 (${usDigits.slice(0,3)}) ${usDigits.slice(3,6)}-${usDigits.slice(6,10)}`;
+  };
+
+  // Handle phone input — auto-format as user types
+  const handlePhoneChange = (e) => {
+    const raw = e.target.value;
+    // Allow user to clear
+    if (!raw) { setField('phone', ''); return; }
+    const formatted = formatPhoneDisplay(raw);
+    setField('phone', formatted);
+  };
+
+  // Normalize phone to E.164 format (+1XXXXXXXXXX) for API
   const normalizePhone = (raw) => {
     const digits = raw.replace(/\D/g, '');
     if (digits.length === 10) return `+1${digits}`;       // US number without country code
@@ -290,7 +310,8 @@ function App() {
     if (!form.lastName.trim()) e.lastName = 'Required';
     if (!form.email.trim() || !form.email.includes('@')) e.email = 'Valid email required';
     const phoneDigits = form.phone.replace(/\D/g, '');
-    if (!form.phone.trim() || phoneDigits.length < 10) e.phone = 'Valid phone number required (e.g. +1 555 123 4567)';
+    if (!form.phone.trim() || phoneDigits.length < 10) e.phone = 'Enter a valid 10-digit US phone number';
+    else if (phoneDigits.length > 11) e.phone = 'Too many digits. Enter a 10-digit US number.';
     if (!form.company.trim()) e.company = 'Required';
     if (!form.selling.trim()) e.selling = 'Tell Michael what to sell';
     setErrors(e);
@@ -377,7 +398,16 @@ function App() {
       });
 
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+
+      // Check for errors — do NOT transition to call page if something went wrong
+      if (!res.ok || data.error) {
+        const msg = typeof data.error === 'string' ? data.error : data.error?.message || 'Unknown error';
+        throw new Error(msg);
+      }
+
+      if (!data.sessionId) {
+        throw new Error('No session ID returned from server');
+      }
 
       setSessionId(data.sessionId);
       setCallStatus('initiating');
@@ -390,7 +420,7 @@ function App() {
       setTimeout(() => setCallStatus('ringing'), 1000);
     } catch (err) {
       console.error('Failed to start call:', err);
-      alert('Failed to initiate call. Please check your phone number and try again.');
+      setErrors(e => ({ ...e, phone: `Call failed: ${err.message}. Check your number and try again.` }));
     } finally {
       setLoading(false);
     }
@@ -591,7 +621,8 @@ function App() {
                 </div>
                 <div className={`fi ${errors.phone ? 'fi-error' : ''}`}>
                   <label>Phone Number <span className="required">*</span></label>
-                  <input type="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} placeholder="+1 555 123 4567" />
+                  <input type="tel" value={form.phone} onChange={handlePhoneChange} placeholder="+1 (347) 990-8998" maxLength={18} />
+                  <span style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px'}}>US numbers only. Format: +1 (XXX) XXX-XXXX</span>
                   {errors.phone && <span className="fi-error-msg">{errors.phone}</span>}
                 </div>
                 <div className={`fi ${errors.company ? 'fi-error' : ''}`}>

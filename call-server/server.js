@@ -14,6 +14,16 @@
  */
 
 require('dotenv').config();
+
+// ─── Crash Protection — keep the container alive and log what killed it ───
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION — keeping server alive:', err.message);
+  console.error(err.stack);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION — keeping server alive:', reason);
+});
+
 const express = require('express');
 const http = require('http');
 const { WebSocketServer, WebSocket } = require('ws');
@@ -33,7 +43,15 @@ const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const CALL_SERVER_SECRET = process.env.CALL_SERVER_SECRET;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://michael-voice-agent.netlify.app,https://michael.mantyl.ai,http://localhost:8888,http://localhost:3000').split(',');
 
-const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+let twilioClient;
+try {
+  twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+  console.log('Twilio client initialized successfully');
+} catch (err) {
+  console.error('Failed to initialize Twilio client:', err.message);
+  console.error('TWILIO_ACCOUNT_SID set:', !!TWILIO_ACCOUNT_SID);
+  console.error('TWILIO_AUTH_TOKEN set:', !!TWILIO_AUTH_TOKEN);
+}
 
 // ─── Express App ───
 const app = express();
@@ -513,8 +531,17 @@ function detectMeetingBooked(michaelText, userText) {
 }
 
 // ─── Start Server ───
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Michael Call Server running on port ${PORT}`);
+  console.log(`Listening on 0.0.0.0:${PORT}`);
   console.log(`Twilio Number: ${TWILIO_PHONE_NUMBER}`);
   console.log(`Allowed Origins: ${ALLOWED_ORIGINS.join(', ')}`);
+  console.log(`RAILWAY_PUBLIC_DOMAIN: ${process.env.RAILWAY_PUBLIC_DOMAIN || '(not set)'}`);
+  console.log(`ENV check — TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID ? 'set' : 'MISSING'}`);
+  console.log(`ENV check — TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN ? 'set' : 'MISSING'}`);
+  console.log(`ENV check — TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER || 'MISSING'}`);
+  console.log(`ENV check — CALL_SERVER_SECRET: ${CALL_SERVER_SECRET ? 'set' : 'MISSING'}`);
+  console.log(`ENV check — OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'set' : 'MISSING'}`);
+  console.log(`ENV check — ELEVENLABS_API_KEY: ${process.env.ELEVENLABS_API_KEY ? 'set' : 'MISSING'}`);
+  console.log(`ENV check — DEEPGRAM_API_KEY: ${process.env.DEEPGRAM_API_KEY ? 'set' : 'MISSING'}`);
 });
