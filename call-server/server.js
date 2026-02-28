@@ -391,7 +391,7 @@ async function handleMediaStream(ws, sessionId) {
             const audioBuffer = await synthesizeSpeech(response);
             console.log(`[${sessionId}] TTS result: audioBuffer=${audioBuffer ? audioBuffer.length + ' bytes' : 'NULL'}, mediaWs=${session.mediaWs ? 'OPEN(state=' + session.mediaWs.readyState + ')' : 'NULL'}, streamSid=${session.streamSid || 'NULL'}`);
             if (audioBuffer && session.mediaWs && session.streamSid) {
-              sendAudioToTwilio(session.mediaWs, session.streamSid, audioBuffer, sessionId);
+              await sendAudioToTwilio(session.mediaWs, session.streamSid, audioBuffer, sessionId);
             } else {
               console.error(`[${sessionId}] SKIPPED audio send! audioBuffer=${!!audioBuffer}, mediaWs=${!!session.mediaWs}, streamSid=${!!session.streamSid}`);
             }
@@ -471,7 +471,7 @@ async function sendOpeningLine(session) {
     const audioBuffer = await synthesizeSpeech(opening);
     console.log(`[${sessionId}] Opening TTS result: audioBuffer=${audioBuffer ? audioBuffer.length + ' bytes' : 'NULL'}, mediaWs=${session.mediaWs ? 'OPEN(state=' + session.mediaWs.readyState + ')' : 'NULL'}, streamSid=${session.streamSid || 'NULL'}`);
     if (audioBuffer && session.mediaWs && session.streamSid) {
-      sendAudioToTwilio(session.mediaWs, session.streamSid, audioBuffer, sessionId);
+      await sendAudioToTwilio(session.mediaWs, session.streamSid, audioBuffer, sessionId);
     } else {
       console.error(`[${sessionId}] SKIPPED opening audio send! audioBuffer=${!!audioBuffer}, mediaWs=${!!session.mediaWs}, streamSid=${!!session.streamSid}`);
     }
@@ -482,8 +482,8 @@ async function sendOpeningLine(session) {
   }
 }
 
-// ─── Send audio to Twilio via Media Stream ───
-function sendAudioToTwilio(mediaWs, streamSid, mulawBuffer, sessionId = 'unknown') {
+// ─── Send audio to Twilio via Media Stream (async with pacing) ───
+async function sendAudioToTwilio(mediaWs, streamSid, mulawBuffer, sessionId = 'unknown') {
   if (mediaWs.readyState !== WebSocket.OPEN) {
     console.error(`[${sessionId}] CANNOT send audio: WebSocket not open (readyState=${mediaWs.readyState})`);
     return;
@@ -494,8 +494,19 @@ function sendAudioToTwilio(mediaWs, streamSid, mulawBuffer, sessionId = 'unknown
   const totalChunks = Math.ceil(mulawBuffer.length / chunkSize);
   console.log(`[${sessionId}] Sending ${mulawBuffer.length} bytes mulaw to Twilio as ${totalChunks} chunks (streamSid: ${streamSid})`);
 
+  // Send in batches to avoid flooding the WebSocket buffer.
+  // Each chunk = 20ms of audio. Send 50 chunks (~1 second of audio) per batch,
+  // then yield to the event loop with a small pause.
+  const BATCH_SIZE = 50;
+  const BATCH_PAUSE_MS = 20; // 20ms pause between batches to let WS drain
+
   let sentChunks = 0;
   for (let i = 0; i < mulawBuffer.length; i += chunkSize) {
+    if (mediaWs.readyState !== WebSocket.OPEN) {
+      console.error(`[${sessionId}] WebSocket closed mid-send at chunk ${sentChunks}/${totalChunks}`);
+      break;
+    }
+
     const chunk = mulawBuffer.slice(i, Math.min(i + chunkSize, mulawBuffer.length));
     const payload = {
       event: 'media',
@@ -510,6 +521,11 @@ function sendAudioToTwilio(mediaWs, streamSid, mulawBuffer, sessionId = 'unknown
     } catch (err) {
       console.error(`[${sessionId}] Error sending chunk ${sentChunks}: ${err.message}`);
       break;
+    }
+
+    // Yield to event loop every BATCH_SIZE chunks to prevent buffer flooding
+    if (sentChunks % BATCH_SIZE === 0) {
+      await new Promise(resolve => setTimeout(resolve, BATCH_PAUSE_MS));
     }
   }
   console.log(`[${sessionId}] Sent ${sentChunks}/${totalChunks} audio chunks to Twilio`);

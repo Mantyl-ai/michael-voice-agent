@@ -1,9 +1,0 @@
-# Serve static files directly (Netlify processes _redirects before netlify.toml)
-/michael.png    /michael.png    200
-
-# API proxies to serverless functions
-/api/initiate-call    /.netlify/functions/initiate-call    200
-/api/debrief          /.netlify/functions/debrief          200
-
-# SPA fallback — only if no file matches
-/*    /index.html    200
