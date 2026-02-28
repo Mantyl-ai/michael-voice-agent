@@ -542,6 +542,9 @@ function detectMeetingBooked(michaelText, userText) {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Michael Call Server running on port ${PORT}`);
   console.log(`Listening on 0.0.0.0:${PORT}`);
+  console.log(`Process PID: ${process.pid}`);
+  console.log(`Node version: ${process.version}`);
+  console.log(`Memory: ${JSON.stringify(process.memoryUsage())}`);
   console.log(`Twilio Number: ${TWILIO_PHONE_NUMBER}`);
   console.log(`Allowed Origins: ${ALLOWED_ORIGINS.join(', ')}`);
   console.log(`RAILWAY_PUBLIC_DOMAIN: ${process.env.RAILWAY_PUBLIC_DOMAIN || '(not set)'}`);
@@ -552,4 +555,47 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`ENV check — OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'set' : 'MISSING'}`);
   console.log(`ENV check — ELEVENLABS_API_KEY: ${process.env.ELEVENLABS_API_KEY ? 'set' : 'MISSING'}`);
   console.log(`ENV check — DEEPGRAM_API_KEY: ${process.env.DEEPGRAM_API_KEY ? 'set' : 'MISSING'}`);
+
+  // Self-check: verify port is actually accepting connections
+  const http = require('http');
+  const testReq = http.get(`http://127.0.0.1:${PORT}/health`, (res) => {
+    let body = '';
+    res.on('data', d => body += d);
+    res.on('end', () => {
+      console.log(`SELF-CHECK OK: /health responded ${res.statusCode} — ${body}`);
+    });
+  });
+  testReq.on('error', (err) => {
+    console.error(`SELF-CHECK FAILED: Could not reach own /health endpoint — ${err.message}`);
+  });
+  testReq.end();
+});
+
+// Catch listen errors (e.g. port in use, permission denied)
+server.on('error', (err) => {
+  console.error(`SERVER LISTEN ERROR: ${err.code} — ${err.message}`);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use!`);
+  }
+  // Don't exit — let Railway see the error in logs
+});
+
+// Keep-alive: prevent Node.js from exiting if all handles close
+const keepAlive = setInterval(() => {
+  // Log heartbeat every 5 minutes so we can see if the process is still running
+  console.log(`HEARTBEAT: pid=${process.pid} uptime=${Math.floor(process.uptime())}s mem=${JSON.stringify(process.memoryUsage())}`);
+}, 300000);
+keepAlive.unref(); // Don't prevent graceful shutdown
+
+// Log when process is about to exit
+process.on('exit', (code) => {
+  console.error(`PROCESS EXIT: code=${code} — this should NOT happen in production`);
+});
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received — Railway is stopping the container');
+  process.exit(0);
+});
+process.on('SIGINT', () => {
+  console.log('SIGINT received — shutting down');
+  process.exit(0);
 });
