@@ -2,7 +2,15 @@
  * Michael — BDR Voice Agent — Debrief Proxy (Claude API)
  *
  * Generates post-call analysis: transcript summary, meeting details,
- * next steps, and follow-up email using Claude.
+ * next steps, follow-up email, AND enterprise call scoring.
+ *
+ * Enterprise features:
+ * - Call quality scoring (0-100)
+ * - Talk-time ratio analysis
+ * - Objection handling assessment
+ * - Qualification depth (BANT)
+ * - Sentiment trajectory
+ * - Callback/voicemail handling notes
  *
  * @endpoint POST /api/debrief → /.netlify/functions/debrief
  * @env ANTHROPIC_API_KEY — Required.
@@ -50,9 +58,26 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { transcript, context } = JSON.parse(event.body);
+    const { transcript, context, scoring } = JSON.parse(event.body);
 
-    const systemPrompt = `You are analyzing a cold call transcript between Michael (a BDR/sales development rep) and a prospect. Generate a structured debrief.
+    // Build scoring context if available
+    let scoringContext = '';
+    if (scoring) {
+      scoringContext = `
+CALL ANALYTICS DATA (from real-time tracking):
+- Overall Score: ${scoring.overallScore}/100
+- Talk Ratio: Prospect spoke ${scoring.talkRatio?.prospectPercent || '?'}% / Michael spoke ${scoring.talkRatio?.michaelPercent || '?'}%
+- Objections Raised: ${scoring.objectionHandling?.count || 0}
+- Meeting Booked: ${scoring.meetingConversion?.booked ? 'YES' : 'NO'}
+- Callback Requested: ${scoring.meetingConversion?.callbackRequested ? 'YES' : 'NO'}
+- Qualification Depth (BANT): ${scoring.qualificationDepth?.depth || 0}/4 (Budget: ${scoring.qualificationDepth?.checklist?.budget ? 'Y' : 'N'}, Authority: ${scoring.qualificationDepth?.checklist?.authority ? 'Y' : 'N'}, Need: ${scoring.qualificationDepth?.checklist?.need ? 'Y' : 'N'}, Timeline: ${scoring.qualificationDepth?.checklist?.timeline ? 'Y' : 'N'})
+- Sentiment Trajectory: ${scoring.sentimentTrajectory?.finalLabel || 'unknown'}
+- Barge-in Count: ${scoring.bargeInCount || 0} (times prospect interrupted)
+- Exchange Count: ${scoring.exchangeCount || 0} back-and-forth exchanges
+`;
+    }
+
+    const systemPrompt = `You are analyzing a cold call transcript between Michael (a BDR/sales development rep) and a prospect. Generate a structured debrief with scoring.
 
 CONTEXT:
 - Michael's Company: ${context.company || 'Unknown'}
@@ -60,8 +85,21 @@ CONTEXT:
 - Prospect: ${context.firstName || 'Unknown'} ${context.lastName || ''}
 - Tone Used: ${context.tone || 'professional'}
 ${context.industry ? `- Industry: ${context.industry}` : ''}
+${scoringContext}
 
 Provide your analysis in these exact sections:
+
+## CALL SCORE: [X/100]
+[One sentence: what this score means — e.g. "Strong discovery call with good objection handling but missed the close."]
+
+## SCORECARD
+| Metric | Score | Notes |
+|--------|-------|-------|
+| Talk Ratio | [1-5] | [How balanced was the conversation? Ideal: prospect 60-70%] |
+| Objection Handling | [1-5] | [How well did Michael handle pushback?] |
+| Meeting Conversion | [1-5] | [Did Michael successfully book a meeting?] |
+| Sentiment Management | [1-5] | [Did the prospect's sentiment improve over the call?] |
+| Qualification Depth | [1-5] | [How many BANT criteria were explored?] |
 
 ## CALL SUMMARY
 [2-3 sentence overview: how the call went, key moments, and outcome]
@@ -73,6 +111,9 @@ Prospect Interest Level: [HIGH/MEDIUM/LOW]
 Key Objections Raised: [list any, or "None"]
 Call Duration Highlights: [what worked well, what could improve]
 
+## COACHING NOTES
+[2-3 specific, actionable coaching tips for Michael to improve. Reference specific moments in the call.]
+
 ## NEXT STEPS
 [Numbered list of 3-5 specific, actionable next steps for the sales team]
 
@@ -83,7 +124,7 @@ Subject: [specific, relevant subject line]
     const messages = [
       {
         role: 'user',
-        content: `Here is the full call transcript:\n\n${transcript}\n\nPlease generate the debrief.`,
+        content: `Here is the full call transcript:\n\n${transcript}\n\nPlease generate the debrief with scoring.`,
       },
     ];
 
@@ -96,7 +137,7 @@ Subject: [specific, relevant subject line]
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
+        max_tokens: 3000,
         system: systemPrompt,
         messages,
       }),
@@ -112,6 +153,7 @@ Subject: [specific, relevant subject line]
           content: data.content[0].text,
           model: data.model,
           usage: data.usage,
+          scoring, // Pass through the real-time scoring data
         }),
       };
     }
