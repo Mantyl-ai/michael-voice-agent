@@ -340,7 +340,14 @@ async function handleMediaStream(ws, sessionId) {
   let deepgramConnection = null;
   let isProcessingResponse = false;
   let audioQueue = []; // Queue audio until Deepgram is ready
-  let openingCooldown = true; // Suppress responses while Michael's opening line plays
+  session.openingCooldown = true; // Suppress responses while Michael's opening line plays
+  // Safety timeout — clear cooldown after 15s max to prevent frozen calls
+  setTimeout(() => {
+    if (session.openingCooldown) {
+      session.openingCooldown = false;
+      console.log(`[${sessionId}] Opening cooldown SAFETY TIMEOUT — forcibly cleared after 15s`);
+    }
+  }, 15000);
 
   // IMPORTANT: Register the message handler FIRST, before awaiting Deepgram.
   // Twilio sends 'connected' and 'start' events immediately on WebSocket open.
@@ -400,9 +407,12 @@ async function handleMediaStream(ws, sessionId) {
 
         if (!text.trim()) return;
 
-        // Suppress responses during opening cooldown (prevents double intro)
-        if (openingCooldown) {
-          console.log(`[${sessionId}] Ignoring user speech during opening cooldown: "${text}"`);
+        // Suppress response generation during opening cooldown (prevents double intro)
+        // Still add message to transcript so nothing is lost
+        if (session.openingCooldown) {
+          console.log(`[${sessionId}] User speech during opening cooldown (queued, no response): "${text}"`);
+          session.addMessage('user', text);
+          broadcastToUI(sessionId, { type: 'user_speech', text, final: true });
           return;
         }
 
@@ -577,12 +587,12 @@ async function sendOpeningLine(session) {
     const estimatedDurationMs = audioBuffer ? Math.ceil((audioBuffer.length / 8000) * 1000) + 1500 : 6000;
     console.log(`[${sessionId}] Opening cooldown will clear in ${estimatedDurationMs}ms`);
     setTimeout(() => {
-      openingCooldown = false;
+      session.openingCooldown = false;
       console.log(`[${sessionId}] Opening cooldown cleared — now accepting user speech`);
     }, estimatedDurationMs);
   } catch (err) {
     console.error(`[${sessionId}] Failed to send opening:`, err.message);
-    openingCooldown = false; // Clear cooldown on error so call isn't stuck
+    session.openingCooldown = false; // Clear cooldown on error so call isn't stuck
   }
 }
 

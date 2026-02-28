@@ -36,20 +36,36 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .hdr-book{padding:6px 16px;background:var(--grad);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .15s}
 .hdr-book:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(107,138,219,.3)}
 
-/* ─── HERO (centered, grid bg — CONDENSED) ─── */
-.hero{background:var(--navy);position:relative;overflow:hidden;padding:28px 28px 16px;text-align:center}
+/* ─── HERO (split layout — left text, right Michael) ─── */
+.hero{background:var(--navy);position:relative;overflow:hidden;padding:40px 28px 32px;text-align:left}
 .hero-grid{position:absolute;inset:0;background-image:
   linear-gradient(rgba(107,138,219,.06) 1px,transparent 1px),
   linear-gradient(90deg,rgba(107,138,219,.06) 1px,transparent 1px);
   background-size:48px 48px;pointer-events:none}
 .hero::before{content:'';position:absolute;inset:0;background:
-  radial-gradient(ellipse 60% 50% at 50% 40%,rgba(107,138,219,.2) 0%,transparent 60%),
-  radial-gradient(ellipse 40% 60% at 50% 80%,rgba(155,127,199,.12) 0%,transparent 55%);pointer-events:none;z-index:1}
-.hero-content{position:relative;z-index:2;max-width:680px;margin:0 auto}
+  radial-gradient(ellipse 60% 50% at 70% 40%,rgba(107,138,219,.2) 0%,transparent 60%),
+  radial-gradient(ellipse 40% 60% at 30% 80%,rgba(155,127,199,.12) 0%,transparent 55%);pointer-events:none;z-index:1}
+.hero-content{position:relative;z-index:2;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+.hero-left{display:flex;flex-direction:column;align-items:flex-start}
+.hero-right{display:flex;flex-direction:column;align-items:center;position:relative}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(107,138,219,.1);border:1px solid rgba(107,138,219,.2);border-radius:20px;font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
-.hero-h1{font-size:44px;font-weight:900;color:#fff;line-height:1.08;letter-spacing:-1.5px;margin-bottom:10px}
+.hero-h1{font-size:48px;font-weight:900;color:#fff;line-height:1.06;letter-spacing:-1.5px;margin-bottom:12px}
 .hero-h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-p{font-size:15px;color:#94a3b8;line-height:1.6;max-width:520px;margin:0 auto 16px}
+.hero-p{font-size:15px;color:#94a3b8;line-height:1.6;max-width:520px;margin:0 0 20px}
+.hero-stats{display:flex;gap:24px;margin-bottom:20px}
+.hero-stat{display:flex;flex-direction:column;align-items:flex-start}
+.hero-stat-val{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.hero-stat-label{font-size:11px;color:#64748b;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+/* Floating badges around Michael */
+.hero-float-badge{position:absolute;z-index:10;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:11px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;animation:float-badge 4s ease-in-out infinite}
+.hero-float-badge .hfb-dot{width:6px;height:6px;border-radius:50%}
+.hero-float-badge.hfb-1{top:10%;right:-8%;animation-delay:0s}
+.hero-float-badge.hfb-1 .hfb-dot{background:var(--green)}
+.hero-float-badge.hfb-2{bottom:25%;left:-5%;animation-delay:1.5s}
+.hero-float-badge.hfb-2 .hfb-dot{background:var(--blue)}
+.hero-float-badge.hfb-3{top:55%;right:-12%;animation-delay:3s}
+.hero-float-badge.hfb-3 .hfb-dot{background:var(--rose)}
+@keyframes float-badge{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
 /* Voice preview button */
 .voice-preview{position:relative;display:inline-flex;align-items:center;gap:12px;padding:12px 24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;cursor:pointer;transition:all .3s;margin-bottom:18px}
@@ -69,17 +85,17 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 @keyframes voice-wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
 .voice-preview-text{color:rgba(255,255,255,.8);font-size:13px;font-weight:600}
 
-/* Michael showcase (centered, Sophie proportions) */
-.michael-showcase{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
-.michael-bg{position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(107,138,219,.35) 0%,rgba(155,127,199,.3) 25%,rgba(212,132,154,.25) 50%,transparent 100%);filter:blur(40px);animation:glow-breathe 6s ease-in-out infinite}
-.michael-ring{position:absolute;width:210px;height:210px;border-radius:50%;border:1.5px solid rgba(107,138,219,.12);animation:ring-pulse 4s ease-in-out infinite}
+/* Michael showcase — larger, more prominent */
+.michael-showcase{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.michael-bg{position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(107,138,219,.35) 0%,rgba(155,127,199,.3) 25%,rgba(212,132,154,.25) 50%,transparent 100%);filter:blur(50px);animation:glow-breathe 6s ease-in-out infinite}
+.michael-ring{position:absolute;width:280px;height:280px;border-radius:50%;border:1.5px solid rgba(107,138,219,.12);animation:ring-pulse 4s ease-in-out infinite}
 @keyframes ring-pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
 @keyframes glow-breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.08);opacity:1}}
-.michael-img{position:relative;z-index:2;width:190px;height:190px;object-fit:cover;object-position:top center;border-radius:50%;filter:drop-shadow(0 12px 36px rgba(0,0,0,.4));border:3px solid rgba(255,255,255,.08)}
+.michael-img{position:relative;z-index:2;width:260px;height:260px;object-fit:cover;object-position:top center;border-radius:50%;filter:drop-shadow(0 16px 48px rgba(0,0,0,.5));border:3px solid rgba(255,255,255,.08)}
 
 /* ─── FLOATING FEATURE BOXES ─── */
-.features-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:900px;margin:0 auto 20px;position:relative;z-index:2}
-.feature-box{background:rgba(255,255,255,.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;flex:1;min-width:200px;max-width:280px;text-align:left;transition:all .3s}
+.features-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:1100px;margin:0 auto 24px;position:relative;z-index:2}
+.feature-box{background:rgba(255,255,255,.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 20px;text-align:left;transition:all .3s}
 .feature-box:hover{background:rgba(255,255,255,.08);border-color:rgba(107,138,219,.25);transform:translateY(-4px)}
 .feature-icon{margin-bottom:6px;width:28px;height:28px}
 .feature-icon svg{width:28px;height:28px}
@@ -98,14 +114,24 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .step-connector{width:48px;height:2px;background:rgba(255,255,255,.08);margin:0 8px;transition:background .3s}
 .step-connector.done{background:var(--green)}
 
-/* ─── FORM CARD ─── */
-.card{background:#fff;border-radius:var(--r-lg);box-shadow:0 4px 24px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);padding:36px;max-width:800px;margin:0 auto;width:100%}
-.card-title{font-size:22px;font-weight:800;margin-bottom:6px;letter-spacing:-.5px}
-.card-sub{color:#64748b;font-size:14px;margin-bottom:28px}
+/* ─── FORM CARD — Sophie-style sections ─── */
+.card{background:#fff;border-radius:var(--r-lg);box-shadow:0 4px 24px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);padding:0;max-width:800px;margin:0 auto;width:100%;overflow:hidden}
+.card-header{background:var(--navy);padding:24px 32px;position:relative}
+.card-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--grad)}
+.card-title{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.5px;color:#fff}
+.card-sub{color:#94a3b8;font-size:14px}
+.card-body{padding:32px}
+/* Form section cards */
+.form-section{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:0;margin-bottom:20px;overflow:hidden}
+.form-section:last-child{margin-bottom:0}
+.form-section-header{padding:12px 20px;background:linear-gradient(135deg,rgba(107,138,219,.08) 0%,rgba(155,127,199,.06) 100%);border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px}
+.form-section-title{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em}
+.form-section-icon{width:16px;height:16px;color:var(--blue)}
+.form-section-body{padding:20px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .fg-full{grid-column:1/-1}
 .fi{display:flex;flex-direction:column;gap:5px}
-.fi label{font-size:12px;font-weight:600;color:var(--navy-ll);text-transform:uppercase;letter-spacing:.04em}
+.fi label{font-size:12px;font-weight:600;color:var(--navy-ll);letter-spacing:.02em}
 .fi input,.fi select,.fi textarea{padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:var(--font);transition:border .15s,box-shadow .15s;background:#fff;color:var(--navy);outline:none}
 .fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(107,138,219,.12)}
 .fi textarea{min-height:80px;resize:vertical}
@@ -114,18 +140,18 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .fi-error-msg{color:var(--red);font-size:11px;font-weight:500}
 
 /* Tone selector */
-.tone-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .tone-opt{padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:10px;text-align:center;cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;background:#fff}
 .tone-opt:hover{border-color:var(--blue);background:rgba(107,138,219,.04)}
 .tone-opt.active{border-color:var(--blue);background:rgba(107,138,219,.08);color:var(--blue-d);font-weight:700}
 
 /* Go button */
-.go-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;margin-top:24px;background:var(--grad);color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:700;font-family:var(--font);cursor:pointer;transition:transform .15s,box-shadow .15s;letter-spacing:-.2px}
+.go-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;margin-top:8px;background:var(--grad);color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:700;font-family:var(--font);cursor:pointer;transition:transform .15s,box-shadow .15s;letter-spacing:-.2px}
 .go-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(107,138,219,.3)}
 .go-btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* ─── SECTION CONTAINER ─── */
-.section{padding:48px 28px;max-width:1000px;margin:0 auto;width:100%}
+.section{padding:36px 28px;max-width:1000px;margin:0 auto;width:100%}
 
 /* ─── PAGE 2: LIVE CALL ─── */
 .call-page{background:var(--navy);min-height:calc(100vh - 56px);display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
@@ -157,16 +183,25 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .call-avatar{position:relative}
 .call-avatar img{width:280px;height:auto;border-radius:20px;filter:drop-shadow(0 16px 48px rgba(0,0,0,.5))}
 
-/* Animated orb behind avatar during call — MORE PRONOUNCED */
+/* Animated orb — Apple Intelligence shimmer style */
 .call-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:380px;height:380px;border-radius:50%;filter:blur(50px);opacity:.85;z-index:0;transition:all .5s ease}
 .call-orb.listening{background:conic-gradient(from 0deg,rgba(107,138,219,.6),rgba(155,127,199,.5),rgba(107,138,219,.6));animation:orb-listen 3s ease-in-out infinite}
-.call-orb.speaking{background:conic-gradient(from 0deg,rgba(107,138,219,.9),rgba(155,127,199,.8),rgba(212,132,154,.8),rgba(232,158,108,.7),rgba(107,138,219,.9));animation:orb-speak 1.2s ease-in-out infinite;box-shadow:0 0 60px 20px rgba(107,138,219,.25),0 0 120px 40px rgba(155,127,199,.15)}
+.call-orb.speaking{background:conic-gradient(from 0deg,rgba(107,138,219,1),rgba(155,127,199,.9),rgba(212,132,154,.9),rgba(232,158,108,.85),rgba(107,138,219,1));animation:orb-shimmer 2s linear infinite;filter:blur(45px);box-shadow:0 0 80px 30px rgba(107,138,219,.3),0 0 160px 60px rgba(155,127,199,.2),0 0 240px 80px rgba(212,132,154,.1)}
 .call-orb.thinking{background:radial-gradient(circle,rgba(155,127,199,.7),rgba(107,138,219,.4));animation:orb-think 1s ease-in-out infinite}
 .call-orb.ringing{background:radial-gradient(circle,rgba(34,197,94,.5),rgba(107,138,219,.4));animation:orb-ring 0.8s ease-in-out infinite}
+/* Apple Intelligence shimmer — rotating conic gradient with morphing shape */
+@keyframes orb-shimmer{0%{transform:translate(-50%,-50%) scale(1) rotate(0deg);border-radius:50%;filter:blur(45px)}25%{transform:translate(-50%,-50%) scale(1.12) rotate(90deg);border-radius:44% 56% 48% 52%;filter:blur(42px)}50%{transform:translate(-50%,-50%) scale(.95) rotate(180deg);border-radius:52% 48% 54% 46%;filter:blur(48px)}75%{transform:translate(-50%,-50%) scale(1.08) rotate(270deg);border-radius:48% 52% 46% 54%;filter:blur(44px)}100%{transform:translate(-50%,-50%) scale(1) rotate(360deg);border-radius:50%;filter:blur(45px)}}
 @keyframes orb-listen{0%,100%{transform:translate(-50%,-50%) scale(1);border-radius:50%}50%{transform:translate(-50%,-50%) scale(1.08);border-radius:46% 54% 50% 50%}}
-@keyframes orb-speak{0%,100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);border-radius:50%}25%{transform:translate(-50%,-50%) scale(1.15) rotate(30deg);border-radius:44% 56% 50% 50%}50%{transform:translate(-50%,-50%) scale(.92) rotate(60deg);border-radius:56% 44% 46% 54%}75%{transform:translate(-50%,-50%) scale(1.1) rotate(90deg);border-radius:46% 54% 56% 44%}}
 @keyframes orb-think{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.08)}}
 @keyframes orb-ring{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
+/* Shimmer ring — secondary glow element during speaking */
+.call-shimmer-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;height:420px;border-radius:50%;z-index:0;opacity:0;transition:opacity .5s ease;pointer-events:none}
+.call-shimmer-ring.active{opacity:1;background:conic-gradient(from 0deg,transparent 0%,rgba(107,138,219,.3) 25%,transparent 50%,rgba(212,132,154,.25) 75%,transparent 100%);animation:shimmer-spin 3s linear infinite;filter:blur(30px)}
+@keyframes shimmer-spin{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(360deg)}}
+/* Geometric shapes animate when speaking */
+.call-page.speaking .call-geo{opacity:1;transition:opacity .5s}
+.call-page:not(.speaking) .call-geo{opacity:.5;transition:opacity .5s}
+.call-page.speaking .call-bg-orb{animation-duration:3s}
 
 /* Voice bars below Michael during call */
 .call-voice-bars{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:36px;margin-top:-8px;opacity:0;transition:opacity .4s ease}
@@ -271,17 +306,20 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 
 /* ─── RESPONSIVE ─── */
 @media(max-width:768px){
+  .hero-content{grid-template-columns:1fr;text-align:center}
+  .hero-left{align-items:center}
+  .hero-stats{justify-content:center}
+  .hero-float-badge{display:none}
   .hero-h1{font-size:36px}
-  .hero-p{font-size:15px}
-  .michael-img{width:180px;height:180px}
-  .michael-bg{width:220px;height:220px}
-  .michael-ring{width:200px;height:200px}
-  .features-row{flex-direction:column;align-items:center;padding:0 20px}
-  .feature-box{max-width:100%}
+  .hero-p{font-size:15px;margin-left:auto;margin-right:auto}
+  .michael-img{width:200px;height:200px}
+  .michael-bg{width:240px;height:240px}
+  .michael-ring{width:220px;height:220px}
+  .features-row{grid-template-columns:1fr;padding:0 20px}
   .steps-row{flex-wrap:wrap;gap:8px}
   .step-connector{width:24px}
   .fg{grid-template-columns:1fr}
-  .tone-grid{grid-template-columns:repeat(2,1fr)}
+  .tone-grid{grid-template-columns:repeat(3,1fr)}
   .call-wrap{grid-template-columns:1fr;gap:24px}
   .call-left{padding-bottom:0}
   .call-avatar img{width:200px}
@@ -738,85 +776,112 @@ function App() {
           <section className="hero">
             <div className="hero-grid" />
             <div className="hero-content">
-              <div className="hero-badge">AI-Powered Outbound</div>
-              <h1 className="hero-h1">Meet <em>Michael</em>, your AI BDR</h1>
-              <p className="hero-p">
-                Stop burning pipeline. Michael handles cold calls at scale with human-like conversations, objection handling, and real-time meeting booking. Built for sales leaders who need results.
-              </p>
-
-              {/* Voice Preview — click to play ElevenLabs sample */}
-              <div className={`voice-preview ${voicePlaying ? 'playing' : ''}`} onClick={playVoicePreview}>
-                <div className="voice-preview-orb" />
-                <div className="voice-preview-inner">
-                  <div className="voice-bars">
-                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
-                    <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+              <div className="hero-left">
+                <div className="hero-badge">AI-Powered Outbound</div>
+                <h1 className="hero-h1">Your AI BDR that <em>actually books meetings</em></h1>
+                <p className="hero-p">
+                  Michael handles cold calls at scale with human-like conversations, real-time objection handling, and meeting booking. Built for sales leaders who need pipeline, not promises.
+                </p>
+                <div className="hero-stats">
+                  <div className="hero-stat">
+                    <span className="hero-stat-val">30s</span>
+                    <span className="hero-stat-label">Setup</span>
                   </div>
-                  <span className="voice-preview-text">
-                    {voiceLoading ? 'Loading...' : voicePlaying ? 'Playing...' : "Preview Michael's Voice"}
-                  </span>
+                  <div className="hero-stat">
+                    <span className="hero-stat-val">5 min</span>
+                    <span className="hero-stat-label">Avg. Call</span>
+                  </div>
+                  <div className="hero-stat">
+                    <span className="hero-stat-val">3</span>
+                    <span className="hero-stat-label">Deliverables</span>
+                  </div>
+                </div>
+                {/* Voice Preview */}
+                <div className={`voice-preview ${voicePlaying ? 'playing' : ''}`} onClick={playVoicePreview}>
+                  <div className="voice-preview-orb" />
+                  <div className="voice-preview-inner">
+                    <div className="voice-bars">
+                      <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                      <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                      <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                      <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                      <div className={`voice-bar ${!voicePlaying ? 'paused' : ''}`} />
+                    </div>
+                    <span className="voice-preview-text">
+                      {voiceLoading ? 'Loading...' : voicePlaying ? 'Playing...' : "Preview Michael's Voice"}
+                    </span>
+                  </div>
+                </div>
+                {/* Step Indicators */}
+                <div className="steps-row" style={{ margin: 0 }}>
+                  <div className="step-item">
+                    <div className={`step-num ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>
+                      {currentStepNum > 1 ? '\u2713' : '1'}
+                    </div>
+                    <span className={`step-label ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>Load Context</span>
+                  </div>
+                  <div className={`step-connector ${currentStepNum > 1 ? 'done' : ''}`} />
+                  <div className="step-item">
+                    <div className={`step-num ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>
+                      {currentStepNum > 2 ? '\u2713' : '2'}
+                    </div>
+                    <span className={`step-label ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>Talk to Michael</span>
+                  </div>
+                  <div className={`step-connector ${currentStepNum > 2 ? 'done' : ''}`} />
+                  <div className="step-item">
+                    <div className={`step-num ${currentStepNum === 3 ? 'active' : ''}`}>3</div>
+                    <span className={`step-label ${currentStepNum === 3 ? 'active' : ''}`}>Debrief</span>
+                  </div>
                 </div>
               </div>
-
-              {/* Michael Image (Sophie proportions: circular, centered) */}
-              <div className="michael-showcase">
-                <div className="michael-bg" />
-                <div className="michael-ring" />
-                <img className="michael-img" src={MICHAEL_IMG} alt="Michael — AI BDR Agent" />
-              </div>
-
-              {/* Floating Feature Boxes */}
-              <div className="features-row">
-                <div className="feature-box">
-                  <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><defs><linearGradient id="icon-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#6B8ADB"/><stop offset="100%" stopColor="#D4849A"/></linearGradient></defs><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>
-                  <div className="feature-title">Auto-Books Meetings</div>
-                  <div className="feature-desc">Michael qualifies prospects and books meetings directly on the call. No handoffs, no delays.</div>
-                </div>
-                <div className="feature-box">
-                  <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-                  <div className="feature-title">Handles Objections</div>
-                  <div className="feature-desc">Trained on proven sales frameworks. Michael navigates pushback like a seasoned rep.</div>
-                </div>
-                <div className="feature-box">
-                  <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-                  <div className="feature-title">Scales Instantly</div>
-                  <div className="feature-desc">Run 100x more outbound without hiring. Michael works around the clock, never burns out.</div>
+              <div className="hero-right">
+                {/* Floating context badges */}
+                <div className="hero-float-badge hfb-1"><span className="hfb-dot" /> Meeting booked</div>
+                <div className="hero-float-badge hfb-2"><span className="hfb-dot" /> Objection handled</div>
+                <div className="hero-float-badge hfb-3"><span className="hfb-dot" /> Follow-up drafted</div>
+                <div className="michael-showcase">
+                  <div className="michael-bg" />
+                  <div className="michael-ring" />
+                  <img className="michael-img" src={MICHAEL_IMG} alt="Michael — AI BDR Agent" />
                 </div>
               </div>
-
-              {/* Step Indicators */}
-              <div className="steps-row">
-                <div className="step-item">
-                  <div className={`step-num ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>
-                    {currentStepNum > 1 ? '\u2713' : '1'}
-                  </div>
-                  <span className={`step-label ${currentStepNum === 1 ? 'active' : currentStepNum > 1 ? 'done' : ''}`}>Load Context</span>
-                </div>
-                <div className={`step-connector ${currentStepNum > 1 ? 'done' : ''}`} />
-                <div className="step-item">
-                  <div className={`step-num ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>
-                    {currentStepNum > 2 ? '\u2713' : '2'}
-                  </div>
-                  <span className={`step-label ${currentStepNum === 2 ? 'active' : currentStepNum > 2 ? 'done' : ''}`}>Talk to Michael</span>
-                </div>
-                <div className={`step-connector ${currentStepNum > 2 ? 'done' : ''}`} />
-                <div className="step-item">
-                  <div className={`step-num ${currentStepNum === 3 ? 'active' : ''}`}>3</div>
-                  <span className={`step-label ${currentStepNum === 3 ? 'active' : ''}`}>Debrief</span>
-                </div>
+            </div>
+            {/* Feature Boxes — full width below hero grid */}
+            <div className="features-row" style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto' }}>
+              <div className="feature-box">
+                <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><defs><linearGradient id="icon-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#6B8ADB"/><stop offset="100%" stopColor="#D4849A"/></linearGradient></defs><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>
+                <div className="feature-title">Auto-Books Meetings</div>
+                <div className="feature-desc">Qualifies prospects and books meetings directly on the call. No handoffs, no delays.</div>
+              </div>
+              <div className="feature-box">
+                <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+                <div className="feature-title">Handles Objections</div>
+                <div className="feature-desc">Trained on proven sales frameworks. Navigates pushback like a seasoned rep.</div>
+              </div>
+              <div className="feature-box">
+                <div className="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#icon-grad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                <div className="feature-title">Scales Instantly</div>
+                <div className="feature-desc">100x more outbound without hiring. Works around the clock, never burns out.</div>
               </div>
             </div>
           </section>
 
-          <section className="section">
+          <section className="section" id="form-section">
             <div className="card">
-              <h2 className="card-title">Configure Michael&#39;s Call</h2>
-              <p className="card-sub">Give Michael context about your product and who you&#39;re selling to. He&#39;ll call you and pitch it live.</p>
+              <div className="card-header">
+                <h2 className="card-title">Configure Michael&#39;s Call</h2>
+                <p className="card-sub">Give Michael context about your product and who you&#39;re selling to. He&#39;ll call you and pitch it live.</p>
+              </div>
+              <div className="card-body">
 
-              <div className="fg">
+              {/* Section 1: Your Details */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <svg className="form-section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span className="form-section-title">Your Details</span>
+                </div>
+                <div className="form-section-body">
+                <div className="fg">
                 <div className={`fi ${errors.firstName ? 'fi-error' : ''}`}>
                   <label>First Name <span className="required">*</span></label>
                   <input value={form.firstName} onChange={e => setField('firstName', e.target.value)} placeholder="John" />
@@ -839,6 +904,18 @@ function App() {
                   {!phonePreview && <span style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px'}}>Enter your 10-digit US number (any format)</span>}
                   {errors.phone && <span className="fi-error-msg">{errors.phone}</span>}
                 </div>
+                </div>
+                </div>
+              </div>
+
+              {/* Section 2: Session Context */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <svg className="form-section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  <span className="form-section-title">Session Context</span>
+                </div>
+                <div className="form-section-body">
+                <div className="fg">
                 <div className={`fi ${errors.company ? 'fi-error' : ''}`}>
                   <label>Your Company <span className="required">*</span></label>
                   <input value={form.company} onChange={e => setField('company', e.target.value)} placeholder="Acme Corp" />
@@ -849,13 +926,36 @@ function App() {
                   <select value={form.industry} onChange={e => setField('industry', e.target.value)}>
                     <option value="">Select industry...</option>
                     <option value="SaaS">SaaS / Software</option>
-                    <option value="Fintech">Fintech</option>
-                    <option value="Healthcare">Healthcare</option>
-                    <option value="E-commerce">E-commerce</option>
+                    <option value="AI/ML">AI / Machine Learning</option>
+                    <option value="Fintech">Fintech / Financial Services</option>
+                    <option value="Healthcare">Healthcare / Life Sciences</option>
+                    <option value="Cybersecurity">Cybersecurity</option>
+                    <option value="Cloud Infrastructure">Cloud Infrastructure</option>
+                    <option value="DevTools">Developer Tools</option>
+                    <option value="Data Analytics">Data / Analytics</option>
+                    <option value="E-commerce">E-commerce / Retail</option>
+                    <option value="MarTech">MarTech / AdTech</option>
+                    <option value="HRTech">HRTech / Recruiting</option>
+                    <option value="EdTech">EdTech / Education</option>
+                    <option value="PropTech">PropTech / Real Estate</option>
+                    <option value="InsurTech">InsurTech / Insurance</option>
+                    <option value="LegalTech">LegalTech</option>
+                    <option value="ConstructionTech">Construction / Engineering</option>
+                    <option value="Supply Chain">Supply Chain / Logistics</option>
                     <option value="Manufacturing">Manufacturing</option>
+                    <option value="Telecommunications">Telecommunications</option>
+                    <option value="Media">Media / Entertainment</option>
                     <option value="Professional Services">Professional Services</option>
-                    <option value="Real Estate">Real Estate</option>
-                    <option value="Education">Education</option>
+                    <option value="Consulting">Consulting</option>
+                    <option value="Staffing">Staffing / Workforce</option>
+                    <option value="Hospitality">Hospitality / Travel</option>
+                    <option value="Food & Beverage">Food & Beverage</option>
+                    <option value="Energy">Energy / Utilities</option>
+                    <option value="CleanTech">CleanTech / Sustainability</option>
+                    <option value="Automotive">Automotive</option>
+                    <option value="Aerospace">Aerospace / Defense</option>
+                    <option value="Nonprofit">Nonprofit / NGO</option>
+                    <option value="Government">Government / Public Sector</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
@@ -874,7 +974,7 @@ function App() {
                 <div className="fi fg-full">
                   <label>Tone <span className="required">*</span></label>
                   <div className="tone-grid">
-                    {['professional', 'friendly', 'aggressive', 'consultative'].map(t => (
+                    {['professional', 'friendly', 'consultative'].map(t => (
                       <div
                         key={t}
                         className={`tone-opt ${form.tone === t ? 'active' : ''}`}
@@ -886,6 +986,18 @@ function App() {
                   </div>
                 </div>
 
+                </div>
+                </div>
+              </div>
+
+              {/* Section 3: Advanced Settings */}
+              <div className="form-section">
+                <div className="form-section-header">
+                  <svg className="form-section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                  <span className="form-section-title">Advanced Settings</span>
+                </div>
+                <div className="form-section-body">
+                <div className="fg">
                 <div className="fi">
                   <label>Target Role/Title</label>
                   <input value={form.targetRole} onChange={e => setField('targetRole', e.target.value)} placeholder="VP of Sales, CTO, etc." />
@@ -902,11 +1014,14 @@ function App() {
                   <label>Additional Context</label>
                   <textarea value={form.additionalContext} onChange={e => setField('additionalContext', e.target.value)} placeholder="Anything else Michael should know..." rows={2} />
                 </div>
+                </div>
+                </div>
               </div>
 
               <button className="go-btn" onClick={startCall} disabled={loading}>
                 {loading ? <><span className="spinner" /> Connecting...</> : <>Let Michael Call You</>}
               </button>
+              </div>
             </div>
           </section>
 
@@ -924,7 +1039,7 @@ function App() {
 
       {/* ─── PAGE 2: LIVE CALL ─── */}
       {step === 'call' && (
-        <div className="call-page">
+        <div className={`call-page ${callStatus === 'speaking' ? 'speaking' : ''}`}>
           {/* Floating background orbs — Mantyl "Idea to Impact" style */}
           <div className="call-bg-orb o1" />
           <div className="call-bg-orb o2" />
@@ -941,6 +1056,7 @@ function App() {
           <div className="call-wrap">
             <div className="call-left">
               <div className="call-avatar">
+                <div className={`call-shimmer-ring ${callStatus === 'speaking' ? 'active' : ''}`} />
                 <div className={`call-orb ${callStatus === 'ringing' ? 'ringing' : callStatus}`} />
                 <img src={MICHAEL_IMG} alt="Michael" style={{ position: 'relative', zIndex: 2 }} />
               </div>
