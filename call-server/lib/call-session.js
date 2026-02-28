@@ -74,6 +74,10 @@ class CallSession {
     // ─── Enterprise: Voicemail detection ───
     this.isVoicemail = false;
     this.voicemailHandled = false;
+
+    // ─── Opening line guard ───
+    this.openingSent = false;        // prevents duplicate opening on double 'start' event
+    this.openingCooldown = false;    // suppresses user turn processing while opening plays
   }
 
   addMessage(role, content) {

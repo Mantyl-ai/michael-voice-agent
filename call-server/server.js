@@ -199,20 +199,29 @@ app.post('/call/initiate', async (req, res) => {
     console.log(`[${sessionId}] Webhook URL: ${serverUrl}/call/webhook/${sessionId}`);
 
     // Initiate outbound call via Twilio
-    // Enterprise: machineDetection for voicemail/AMD handling
-    const call = await twilioClient.calls.create({
+    // Enterprise: AMD (Answering Machine Detection) is ASYNC only — it runs in background
+    // and does NOT block or delay the media stream connection. This prevents the "silent call" bug
+    // where DetectMessageEnd holds the stream while analyzing the greeting.
+    const callParams = {
       to: phone,
       from: TWILIO_PHONE_NUMBER,
       url: `${serverUrl}/call/webhook/${sessionId}`,
       statusCallback: `${serverUrl}/call/status/${sessionId}`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST',
-      machineDetection: 'DetectMessageEnd', // Enterprise: Detect voicemail beep
-      asyncAmd: true,
-      asyncAmdStatusCallback: `${serverUrl}/call/amd/${sessionId}`,
-      asyncAmdStatusCallbackMethod: 'POST',
       timeout: 30,
-    });
+    };
+
+    // Only enable AMD if env var is set — it can cause stream delays on some carriers
+    if (process.env.ENABLE_AMD === 'true') {
+      callParams.machineDetection = 'Enable'; // 'Enable' is faster than 'DetectMessageEnd'
+      callParams.asyncAmd = true;
+      callParams.asyncAmdStatusCallback = `${serverUrl}/call/amd/${sessionId}`;
+      callParams.asyncAmdStatusCallbackMethod = 'POST';
+      console.log(`[${sessionId}] AMD enabled (async)`);
+    }
+
+    const call = await twilioClient.calls.create(callParams);
 
     session.callSid = call.sid;
     session.status = 'initiating';

@@ -116,17 +116,17 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
 .feature-title{color:#fff;font-size:14px;font-weight:700;margin-bottom:4px}
 .feature-desc{color:#94a3b8;font-size:12px;line-height:1.5}
 
-/* ─── STEP INDICATORS — Sophie-style white bar ─── */
-.steps-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 28px;position:sticky;top:56px;z-index:90;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.steps-row{display:flex;align-items:center;justify-content:center;gap:0;max-width:600px;margin:0 auto}
-.step-item{display:flex;align-items:center;gap:10px}
-.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid #cbd5e1;color:#94a3b8;transition:all .3s}
+/* ─── STEP INDICATORS — compact navy bar ─── */
+.steps-bar{background:var(--navy);border-bottom:1px solid rgba(255,255,255,.08);padding:8px 28px;position:sticky;top:56px;z-index:90}
+.steps-row{display:flex;align-items:center;justify-content:center;gap:0;max-width:480px;margin:0 auto}
+.step-item{display:flex;align-items:center;gap:6px}
+.step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #475569;color:#64748b;transition:all .3s}
 .step-num.active{border-color:var(--blue);color:#fff;background:var(--blue)}
 .step-num.done{border-color:var(--green);color:#fff;background:var(--green)}
-.step-label{color:#94a3b8;font-size:12px;font-weight:600;transition:color .3s}
-.step-label.active{color:var(--navy)}
+.step-label{color:#64748b;font-size:11px;font-weight:600;transition:color .3s}
+.step-label.active{color:#fff}
 .step-label.done{color:var(--green)}
-.step-connector{width:48px;height:2px;background:#e2e8f0;margin:0 8px;transition:background .3s}
+.step-connector{width:36px;height:2px;background:#334155;margin:0 6px;transition:background .3s}
 .step-connector.done{background:var(--green)}
 
 /* ─── FORM CARD — Sophie-style sections ─── */
@@ -355,8 +355,8 @@ body{font-family:var(--font);color:var(--navy);background:#fff;min-height:100vh}
   .michael-bg-inner{width:200px;height:200px}
   .michael-ring{width:220px;height:220px}
   .features-col{padding:0 10px}
-  .steps-row{flex-wrap:wrap;gap:8px}
-  .step-connector{width:24px}
+  .steps-row{flex-wrap:wrap;gap:6px}
+  .step-connector{width:20px}
   .scroll-indicator{display:none}
   .fg{grid-template-columns:1fr}
   .tone-grid{grid-template-columns:repeat(3,1fr)}
@@ -842,6 +842,7 @@ function App() {
             <div className="hero-content">
                 <div className="hero-badge">AI-Powered Outbound</div>
                 <h1 className="hero-h1">Meet <em>Michael</em>, your AI BDR</h1>
+                <p style={{color:'#94a3b8',fontSize:16,maxWidth:520,margin:'0 auto 24px',lineHeight:1.6}}>Michael handles cold calls at scale with human-level persuasion, so your team can focus on closing.</p>
 
                 {/* 2-column layout: Michael LEFT | Features RIGHT */}
                 <div className="hero-two-col">
